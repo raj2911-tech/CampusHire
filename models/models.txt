@@ -1,0 +1,121 @@
+========================
+DATABASE SCHEMA OVERVIEW
+========================
+
+
+------------------------
+USERS COLLECTION
+------------------------
+users {
+    _id,
+    email,
+    password,
+    role,                // STUDENT | COLLEGE | COMPANY
+    createdAt,
+}
+
+
+------------------------
+COLLEGES COLLECTION
+------------------------
+colleges {
+    _id,
+    userId,              // reference → users._id
+
+    name,
+    placementOfficer {
+        name,
+        email,
+        mobile,
+    },
+
+    isApproved,          // true | false
+}
+
+
+------------------------
+STUDENTS COLLECTION
+------------------------
+students {
+    _id,
+    userId,              // reference → users._id
+    collegeId,           // reference → colleges._id
+
+    name,
+    enrollment_no,
+    email,
+
+    academics {
+        cgpa,
+        branch,
+        graduationYear,
+        skills [ ],       // array of strings
+    },
+
+    isPlaced,            // true | false
+    blacklistedBy [ ],   // array of collegeIds
+}
+
+
+------------------------
+COMPANIES COLLECTION
+------------------------
+companies {
+    _id,
+    userId,              // reference → users._id
+
+    name,
+    about,               // company description (text / markdown)
+    website,
+    foundedYear,
+    industry,
+    specialties [ ],     // ex: Backend, AI, FinTech
+    companySize,         // ex: 50-100, 500+
+    headquarters,        // optional
+
+    contactPerson {
+        name,
+        email,
+        mobile,
+    },
+
+    createdAt,
+    updatedAt,
+}
+
+
+------------------------
+JOBS COLLECTION
+------------------------
+jobs {
+    _id,
+    companyId,           // reference → companies._id
+    collegeId,           // reference → colleges._id
+
+    title,
+    description,
+    salary,
+    deadline,
+
+    eligibility {
+        minCGPA,
+        allowedBranches [ ],
+        graduationYear,
+    },
+
+    status,              // PENDING | APPROVED | REJECTED
+    createdAt,
+}
+
+
+------------------------
+APPLICATIONS COLLECTION
+------------------------
+applications {
+    _id,
+    studentId,           // reference → students._id
+    jobId,               // reference → jobs._id
+
+    status,              // APPLIED | SHORTLISTED | REJECTED | HIRED
+    appliedAt,
+}
