@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import authRouter from "../routes/auth/authRoutes.js";
 
 const app = express();
 
@@ -21,7 +22,7 @@ app.get("/", (req, res) => {
 });
 
 /* -------------------- ROUTES -------------------- */
-
+app.use('/api/auth',authRouter);
 
 
 /* -------------------- ERROR HANDLER -------------------- */
