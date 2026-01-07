@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Register</title>
+</head>
+<body>
+  <h2>Register</h2>
+
+  <form id="registerForm">
+    <!-- Common fields -->
+    <input type="email" id="email" placeholder="Email" required />
+    <br /><br />
+    <input type="password" id="password" placeholder="Password" required />
+    <br /><br />
+
+    <select id="role" required>
+      <option value="">Select Role</option>
+      <option value="STUDENT">Student</option>
+      <option value="COLLEGE">College</option>
+      <option value="COMPANY">Company</option>
+    </select>
+
+    <br /><br />
+
+    <!-- STUDENT -->
+    <div id="studentFields" style="display:none;">
+      <input type="text" id="studentName" placeholder="Student Name" />
+      <br /><br />
+      <input type="text" id="enrollment" placeholder="Enrollment No" />
+      <br /><br />
+      <select id="collegeId">
+        <option value="">Select College</option>
+      </select>  
+      <br /><br />
+      <input type="number" id="cgpa" placeholder="CGPA" />
+      <br /><br />
+      <input type="text" id="branch" placeholder="Branch" />
+      <br /><br />
+      <input type="number" id="gradYear" placeholder="Graduation Year" />
+    </div>
+
+    <!-- COLLEGE -->
+    <div id="collegeFields" style="display:none;">
+      <input type="text" id="collegeName" placeholder="College Name" />
+      <br /><br />
+      <input type="text" id="poName" placeholder="Placement Officer Name" />
+      <br /><br />
+      <input type="email" id="poEmail" placeholder="Placement Officer Email" />
+      <br /><br />
+      <input type="text" id="poMobile" placeholder="Placement Officer Mobile" />
+    </div>
+
+    <!-- COMPANY -->
+    <div id="companyFields" style="display:none;">
+      <input type="text" id="companyName" placeholder="Company Name" />
+      <br /><br />
+      <input type="text" id="about" placeholder="About Company" />
+      <br /><br />
+      <input type="number" id="foundedYear" placeholder="Founded Year" />
+      <br /><br />
+      <input type="text" id="industry" placeholder="Industry" />
+      <br /><br />
+      <input type="text" id="specialties" placeholder="Specialties (comma separated)" />
+      <br /><br />
+      <input type="text" id="contactName" placeholder="Contact Person Name" />
+      <br /><br />
+      <input type="email" id="contactEmail" placeholder="Contact Person Email" />
+      <br /><br />
+      <input type="text" id="contactMobile" placeholder="Contact Person Mobile" />
+    </div>
+
+    <br />
+    <button type="submit">Register</button>
+  </form>
+
+  <p id="msg"></p>
+
+  <script>
+    const roleSelect = document.getElementById("role");
+    const student = document.getElementById("studentFields");
+    const college = document.getElementById("collegeFields");
+    const company = document.getElementById("companyFields");
+    const collegeSelect = document.getElementById("collegeId");
+    
+    async function loadColleges() {
+    try {
+      const res = await fetch("/api/colleges/public");
+      const data = await res.json();
+
+      if (data.success) {
+        data.colleges.forEach(college => {
+          const option = document.createElement("option");
+          option.value = college._id;   // IMPORTANT
+          option.textContent = college.name;
+          collegeSelect.appendChild(option);
+        });
+      }
+    } catch (err) {
+      console.error("Failed to load colleges");
+    }
+  }
+
+  // Load colleges on page load
+  loadColleges();
+
+    roleSelect.addEventListener("change", () => {
+      student.style.display = "none";
+      college.style.display = "none";
+      company.style.display = "none";
+
+      if (roleSelect.value === "STUDENT") student.style.display = "block";
+      if (roleSelect.value === "COLLEGE") college.style.display = "block";
+      if (roleSelect.value === "COMPANY") company.style.display = "block";
+    });
+
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const role = roleSelect.value;
+
+      let payload = {
+        email: email.value,
+        password: password.value,
+        role
+      };
+
+      if (role === "STUDENT") {
+        payload = {
+          ...payload,
+          name: studentName.value,
+          enrollment_no: enrollment.value,
+          collegeId: collegeId.value,
+          academics: {
+            cgpa: cgpa.value,
+            branch: branch.value,
+            graduationYear: gradYear.value
+          }
+        };
+      }
+
+      if (role === "COLLEGE") {
+        payload = {
+          ...payload,
+          name: collegeName.value,
+          placementOfficer: {
+            name: poName.value,
+            email: poEmail.value,
+            mobile: poMobile.value
+          }
+        };
+      }
+
+      if (role === "COMPANY") {
+        payload = {
+          ...payload,
+          name: companyName.value,
+          about: about.value,
+          foundedYear: foundedYear.value,
+          industry: industry.value,
+          specialties: specialties.value.split(","),
+          contactPerson: {
+            name: contactName.value,
+            email: contactEmail.value,
+            mobile: contactMobile.value
+          }
+        };
+      }
+
+      
+
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      document.getElementById("msg").innerText = data.message;
+    });
+  </script>
+</body>
+</html>

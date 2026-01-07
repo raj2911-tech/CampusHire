@@ -1,9 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import userModel from '../../models/users.js';
-import collegeModel from '../../models/colleges.js'
-import studentModel from '../../models/students.js';
-import companyModel from '../../models/companies.js';
+import {createCollegeProfile, createCompanyProfile, createStudentProfile} from '../../services/registerService.js';
 
 export const register= async(req, res)=>{
     const {email, password,role}=req.body;
@@ -15,6 +13,8 @@ export const register= async(req, res)=>{
     if(role!=="STUDENT" && role!=="COLLEGE" && role!=="COMPANY"){
         return res.json({success: false, message: 'Invalid Role'})
     }
+    
+    let user;
 
     try{
 
@@ -26,13 +26,29 @@ export const register= async(req, res)=>{
 
         const hashedPassword= await bcrypt.hash(password, 10);
 
-        const user=new userModel({email, password: hashedPassword,role});
+        user=new userModel({email, password: hashedPassword,role});
         await user.save();
 
-        return res.json({success:true});
 
+        if(role==="COLLEGE"){
+          await createCollegeProfile(user, req.body);
+        }
+
+        else if(role==="STUDENT"){
+          await createStudentProfile(user, req.body);
+        }
+
+        else if(role==="COMPANY"){
+          await createCompanyProfile(user, req.body);
+        }
+
+
+        return res.json({success:true, message: 'Profile created successfully'});
 
     } catch(error){
+         if (user){
+             await userModel.findByIdAndDelete(user._id); // rollback
+         }
         return res.json({success: false, message: error.message})
 
     }
@@ -41,14 +57,47 @@ export const register= async(req, res)=>{
 };
 
 export const login=async(req, res)=>{
-    res.status(200).json({
-        success: true,
-        message: "Login controller reached"
-      });
+    const {email, password} =req.body;
+
+    if(!email || !password){
+        return res.json({success: false, message:"email and password are required"});
+    }
+
+    try{
+        const user= await userModel.findOne({email});
+        if(!user){
+            return res.json({success: false, message:"invalid email"});
+        }
+
+        const isMatch= await bcrypt.compare(password, user.password);
+
+        if(!isMatch){
+            return res.json({success: false, message:"invalid password"});
+        }
+
+        const token= jwt.sign({id: user._id, role:user.role}, process.env.JWT_SECRET, {expiresIn: '1d'});
+
+        res.cookie('token',token,{
+            httpOnly:true,
+            // change if it is in production environment. change this with env file
+            secure: process.env.NODE_ENV === 'production',
+            // if fronted and backend running on same server change it to 'strict' 
+            sameSite: process.env.NODE_ENV === 'production' ?
+            'none' : 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        return res.json({success:true});
+
+
+
+    }catch (error){
+        return res.json({success: false, message: error.message});
+    }
 };
 
 export const logout=async(req, res)=>{
-    res.status(200).json({
+    res.clearCookie("token").json({
         success: true,
         message: "Logout successful"
       });

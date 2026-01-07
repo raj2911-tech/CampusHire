@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import authRouter from "../routes/auth/authRoutes.js";
+import pageRoutes from "../routes/page/pageRoutes.js";
+import collegeRoutes from "../routes/college/collegeRoutes.js";
 
 const app = express();
 
@@ -11,6 +13,8 @@ app.use(express.json());
 
 // Enable CORS
 app.use(cors());
+// EJS
+app.set("view engine", "ejs");
 
 /* -------------------- HEALTH CHECK -------------------- */
 
@@ -22,7 +26,10 @@ app.get("/", (req, res) => {
 });
 
 /* -------------------- ROUTES -------------------- */
+app.use("/", pageRoutes);
 app.use('/api/auth',authRouter);
+app.use("/api/colleges", collegeRoutes);
+
 
 
 /* -------------------- ERROR HANDLER -------------------- */
