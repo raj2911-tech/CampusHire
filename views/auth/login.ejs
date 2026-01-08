@@ -38,6 +38,7 @@
 
       if (data.success) {
         msg.innerText = "Login successful";
+        window.location.href = "/dashboard";
         // later redirect based on role
       } else {
         msg.innerText = data.message;

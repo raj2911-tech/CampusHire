@@ -1,7 +1,8 @@
 import collegeModel from "../../models/colleges.js";
+import studentModel from "../../models/students.js";
 
 export const getProfile = async (req, res) => {
-  const { id } = req.params;
+  const  id  = req.user.id;
 
   try {
     const profile = await collegeModel.findById(id);
@@ -27,7 +28,7 @@ export const getProfile = async (req, res) => {
 };
 
 export const updateProfile = async (req, res) => {
-    const { id } = req.params;
+    const  id  = req.user.id;
     const { name, placementOfficer } = req.body;
   
     try {
@@ -62,4 +63,19 @@ export const updateProfile = async (req, res) => {
       });
     }
   };
-  
+
+export const viewStudents = async (req, res) => {
+    const collegeId = req.user.id;
+    try {
+        const students = await studentModel.find({ collegeId },{enrollment_no:1, name:2, blacklistedBy:3});
+
+        res.json({
+            success: true,
+            count: students.length,
+            students
+        });
+    }
+    catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
