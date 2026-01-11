@@ -3,6 +3,7 @@ import studentModel from "../../models/students.js";
 
 export const getProfile = async (req, res) => {
   const  id  = req.user.id;
+  const email= req.user.email;
 
   try {
     const profile = await collegeModel.findOne({ userId: id });
@@ -16,7 +17,8 @@ export const getProfile = async (req, res) => {
 
     return res.json({
       success: true,
-      profile
+      profile,
+      email
     });
 
   } catch (error) {

@@ -20,7 +20,8 @@ export const protect = async (req, res, next) => {
     // Attach user info to request
     req.user = {
       id: decoded.id,
-      role: decoded.role
+      role: decoded.role,
+      email:decoded.email
     };
 
     next(); // move to next middleware / controller

@@ -23,5 +23,8 @@ router.get("/college/students", protect, (req, res) => {
   res.render("college/students");
 });
 
+router.get("/college/profile/edit", protect, (req, res) => {
+    res.render("college/editProfile");
+});
 
 export default router;

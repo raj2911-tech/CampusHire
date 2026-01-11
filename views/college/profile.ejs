@@ -1,28 +1,552 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>College Profile</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: white;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar.collapsed {
+      transform: translateX(-260px);
+    }
+
+    .sidebar-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 25px 20px;
+      color: white;
+    }
+
+    .sidebar-header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .sidebar-header p {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .sidebar nav {
+      padding: 20px 0;
+    }
+
+    .sidebar nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 15px;
+      font-weight: 500;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar nav a:hover {
+      background: #f8f9fa;
+      border-left-color: #667eea;
+    }
+
+    .sidebar nav a.active {
+      background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+      color: #667eea;
+      border-left-color: #667eea;
+    }
+
+    .sidebar nav a span:first-child {
+      font-size: 18px;
+      width: 24px;
+      text-align: center;
+    }
+
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    .main-content.expanded {
+      margin-left: 0;
+    }
+
+    .top-bar {
+      background: white;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .top-bar h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .back-btn {
+      background: #f8f9fa;
+      color: #333;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .back-btn:hover {
+      background: #e9ecef;
+    }
+
+    .edit-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .edit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .content-area {
+      padding: 30px;
+    }
+
+    .profile-header {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 40px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .profile-info {
+      flex: 1;
+    }
+
+    .profile-name {
+      font-size: 28px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .profile-email {
+      font-size: 16px;
+      color: #667eea;
+      margin-bottom: 12px;
+    }
+
+    .profile-meta {
+      display: flex;
+      gap: 20px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .profile-meta span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 20px;
+    }
+
+    .profile-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .info-row {
+      display: flex;
+      padding: 12px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #666;
+      min-width: 120px;
+      font-size: 14px;
+    }
+
+    .info-value {
+      color: #333;
+      font-size: 14px;
+      flex: 1;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: #667eea;
+      font-size: 16px;
+    }
+
+    .error {
+      text-align: center;
+      padding: 60px 20px;
+      color: #e74c3c;
+      font-size: 16px;
+    }
+
+    .menu-toggle {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #333;
+      padding: 8px;
+      border-radius: 6px;
+      transition: background 0.2s ease;
+    }
+
+    .menu-toggle:hover {
+      background: #f0f0f0;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 99;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar.collapsed {
+        transform: translateX(-260px);
+      }
+
+      .sidebar:not(.collapsed) {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .main-content.expanded {
+        margin-left: 0;
+      }
+
+      .overlay.active {
+        display: block;
+      }
+
+      .profile-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-header {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .profile-meta {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .info-row {
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .info-label {
+        min-width: auto;
+      }
+
+      .top-bar-right {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h1>College Dashboard</h1>
+      <p>Placement Management System</p>
+    </div>
+    <nav>
+      <a href="/college/dashboard">
+        <span>📊</span>
+        <span>Overview</span>
+      </a>
+      <a href="/college/profile" class="active">
+        <span>🏛️</span>
+        <span>College Profile</span>
+      </a>
+      <a href="/college/students">
+        <span>👥</span>
+        <span>Student Management</span>
+      </a>
+      <a href="/college/jobs">
+        <span>💼</span>
+        <span>Job Postings</span>
+      </a>
+      <a href="/college/reports">
+        <span>📈</span>
+        <span>Reports</span>
+      </a>
+    </nav>
+  </aside>
 
-<h2>College Profile</h2>
+  <div class="overlay" id="overlay"></div>
 
-<pre id="profile"></pre>
+  <main class="main-content" id="mainContent">
+    <div class="top-bar">
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <button class="menu-toggle" type="button">☰</button>
+        <h2>College Profile</h2>
+      </div>
+      <div class="top-bar-right">
+        <a href="/college/profile/edit"> <button class="edit-btn">✏️ Edit Profile</button></a>
+        <a href="/college/dashboard" class="back-btn">← Back</a>
+      </div>
+    </div>
 
-<a href="/college/dashboard">Back</a>
+    <div class="content-area">
+      <div id="profileContent">
+        <div class="loading">Loading profile...</div>
+      </div>
+    </div>
+  </main>
 
-<script>
-  async function loadProfile() {
-    const res = await fetch("/api/colleges/profile", {
-      credentials: "include"
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const overlay = document.getElementById('overlay');
+      
+      if (sidebar && mainContent) {
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('expanded');
+        
+        if (window.innerWidth <= 768 && overlay) {
+          overlay.classList.toggle('active');
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuToggle = document.querySelector('.menu-toggle');
+      const overlay = document.getElementById('overlay');
+      
+      if (menuToggle) {
+        menuToggle.addEventListener('click', toggleSidebar);
+      }
+      
+      if (overlay) {
+        overlay.addEventListener('click', function() {
+          if (window.innerWidth <= 768) {
+            toggleSidebar();
+          }
+        });
+      }
     });
-    const data = await res.json();
-    document.getElementById("profile").innerText =
-      JSON.stringify(data.profile, null, 2);
-  }
 
-  loadProfile();
-</script>
+    async function loadProfile() {
+      try {
+        const res = await fetch("/api/colleges/profile", {
+          credentials: "include"
+        });
+        const data = await res.json();
 
+        if (data.profile && data.email) {
+          displayProfile(data.profile, data.email);
+        } else {
+          document.getElementById("profileContent").innerHTML = 
+            '<div class="error">Failed to load profile</div>';
+        }
+      } catch (error) {
+        document.getElementById("profileContent").innerHTML = 
+          '<div class="error">Error loading profile. Please try again.</div>';
+      }
+    }
+
+    function displayProfile(profile, email) {
+      const contentDiv = document.getElementById("profileContent");
+      
+      const firstLetter = profile.name ? profile.name.charAt(0).toUpperCase() : 'C';
+      const createdDate = profile.createdAt ? new Date(profile.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
+      const updatedDate = profile.updatedAt ? new Date(profile.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
+
+      contentDiv.innerHTML = `
+        <div class="profile-header">
+          <div class="profile-avatar">${firstLetter}</div>
+          <div class="profile-info">
+            <div class="profile-name">${profile.name || 'N/A'}</div>
+            <div class="profile-email">${email}</div>
+            <div class="profile-meta">
+              <span>📅 Joined: ${createdDate}</span>
+              <span>🔄 Last Updated: ${updatedDate}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-grid">
+          <!-- College Details -->
+          <div class="profile-card">
+            <div class="card-header">
+              <div class="card-icon">🏛️</div>
+              <div class="card-title">College Details</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">College Name:</div>
+              <div class="info-value">${profile.name || 'N/A'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Email Address:</div>
+              <div class="info-value">${email}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">College ID:</div>
+              <div class="info-value">${profile._id || 'N/A'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">User ID:</div>
+              <div class="info-value">${profile.userId || 'N/A'}</div>
+            </div>
+          </div>
+
+          <!-- Placement Officer -->
+          ${profile.placementOfficer ? `
+          <div class="profile-card">
+            <div class="card-header">
+              <div class="card-icon">👤</div>
+              <div class="card-title">Placement Officer</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Name:</div>
+              <div class="info-value">${profile.placementOfficer.name || 'N/A'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Email:</div>
+              <div class="info-value">${profile.placementOfficer.email || 'N/A'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Mobile:</div>
+              <div class="info-value">${profile.placementOfficer.mobile || 'N/A'}</div>
+            </div>
+          </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    loadProfile();
+  </script>
 </body>
 </html>

@@ -1,81 +1,518 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>College Students</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: white;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    .sidebar-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 25px 20px;
+      color: white;
+    }
+
+    .sidebar-header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .sidebar-header p {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .sidebar nav {
+      padding: 20px 0;
+    }
+
+    .sidebar nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 15px;
+      font-weight: 500;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar nav a:hover {
+      background: #f8f9fa;
+      border-left-color: #667eea;
+    }
+
+    .sidebar nav a.active {
+      background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+      color: #667eea;
+      border-left-color: #667eea;
+    }
+
+    .sidebar nav a span:first-child {
+      font-size: 18px;
+      width: 24px;
+      text-align: center;
+    }
+
+    .main-content {
+      width: 100%;
+      margin-left: 260px;
+      transition: margin-left 0.3s ease;
+    }
+
+    .main-content.full {
+      margin-left: 0;
+    }
+
+    .top-bar {
+      background: white;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .top-bar h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .back-btn {
+      background: #f8f9fa;
+      color: #333;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .back-btn:hover {
+      background: #e9ecef;
+    }
+
+    .content-area {
+      padding: 30px;
+    }
+
+    .search-bar {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-bottom: 20px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    thead th {
+      padding: 16px 20px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.2s ease;
+    }
+
+    tbody tr:hover {
+      background: #f8f9fa;
+    }
+
+    tbody td {
+      padding: 16px 20px;
+      color: #333;
+      font-size: 15px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .status-yes {
+      background: #fee;
+      color: #c33;
+    }
+
+    .status-no {
+      background: #efe;
+      color: #3c3;
+    }
+
+    .action-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-blacklist {
+      background: #e74c3c;
+      color: white;
+      box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
+    }
+
+    .btn-blacklist:hover {
+      background: #c0392b;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
+    }
+
+    .btn-unblacklist {
+      background: #27ae60;
+      color: white;
+      box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+    }
+
+    .btn-unblacklist:hover {
+      background: #229954;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(39, 174, 96, 0.4);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+
+    .empty-state svg {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 20px;
+      opacity: 0.3;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: #667eea;
+      font-size: 16px;
+    }
+
+    .menu-toggle {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #333;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: white;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+
+      transform: translateX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar.closed {
+      transform: translateX(-100%);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      .table-container {
+        overflow-x: auto;
+      }
+
+      table {
+        min-width: 600px;
+      }
+
+      .search-bar {
+        flex-direction: column;
+      }
+    }
+  </style>
 </head>
+
 <body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h1>College Dashboard</h1>
+      <p>Placement Management System</p>
+    </div>
+    <nav>
+      <a href="/college/dashboard">
+        <span>📊</span>
+        <span>Overview</span>
+      </a>
+      <a href="/college/profile">
+        <span>🏛️</span>
+        <span>College Profile</span>
+      </a>
+      <a href="/college/students" class="active">
+        <span>👥</span>
+        <span>Student Management</span>
+      </a>
+      <a href="/college/jobs">
+        <span>💼</span>
+        <span>Job Postings</span>
+      </a>
+      <a href="/college/reports">
+        <span>📈</span>
+        <span>Reports</span>
+      </a>
+    </nav>
+  </aside>
 
-<h2>Students</h2>
+  <main class="main-content">
+    <div class="top-bar">
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <h2>Student Management</h2>
+      </div>
+      <div class="top-bar-right">
+        <a href="/college/dashboard" class="back-btn">← Back to Dashboard</a>
+      </div>
+    </div>
 
-<table border="1" cellpadding="5">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Enrollment</th>
-      <th>Blacklisted</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-  <tbody id="studentsTable"></tbody>
-</table>
+    <div class="content-area">
+      <div class="search-bar">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search by name or enrollment number...">
+      </div>
 
-<br />
-<a href="/college/dashboard">Back</a>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Enrollment Number</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="studentsTable">
+            <tr>
+              <td colspan="4" class="loading">Loading students...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
 
-<script>
-async function loadStudents() {
-  const res = await fetch("/api/colleges/students", {
-    credentials: "include"
-  });
-  const data = await res.json();
+  <script>
+    let allStudents = [];
 
-  const table = document.getElementById("studentsTable");
-  table.innerHTML = "";
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      const main = document.querySelector(".main-content");
 
-  data.students.forEach(student => {
-    const tr = document.createElement("tr");
+      sidebar.classList.toggle("closed");
+      main.classList.toggle("full");
+    }
 
-    const isBlacklisted = student.blacklistedBy.length > 0;
 
-    tr.innerHTML = `
-      <td>${student.name}</td>
-      <td>${student.enrollment_no}</td>
-      <td>${isBlacklisted ? "YES" : "NO"}</td>
-      <td></td>
-    `;
+    async function loadStudents() {
+      try {
+        const res = await fetch("/api/colleges/students", {
+          credentials: "include"
+        });
+        const data = await res.json();
 
-    const btn = document.createElement("button");
-    btn.textContent = isBlacklisted ? "Unblacklist" : "Blacklist";
+        allStudents = data.students || [];
+        renderStudents(allStudents);
+      } catch (error) {
+        const table = document.getElementById("studentsTable");
+        table.innerHTML = `
+          <tr>
+            <td colspan="4" class="empty-state">
+              <div>⚠️</div>
+              <div>Failed to load students</div>
+            </td>
+          </tr>
+        `;
+      }
+    }
 
-    btn.addEventListener("click", () => {
-      isBlacklisted
-        ? unBlacklist(student._id)
-        : blacklist(student._id);
+    function renderStudents(students) {
+      const table = document.getElementById("studentsTable");
+
+      if (students.length === 0) {
+        table.innerHTML = `
+          <tr>
+            <td colspan="4" class="empty-state">
+              <div>👥</div>
+              <div>No students found</div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      table.innerHTML = "";
+
+      students.forEach(student => {
+        const tr = document.createElement("tr");
+        const isBlacklisted = student.blacklistedBy && student.blacklistedBy.length > 0;
+
+        const nameTd = document.createElement("td");
+        nameTd.textContent = student.name;
+
+        const enrollmentTd = document.createElement("td");
+        enrollmentTd.textContent = student.enrollment_no;
+
+        const statusTd = document.createElement("td");
+        const statusBadge = document.createElement("span");
+        statusBadge.className = `status-badge ${isBlacklisted ? 'status-yes' : 'status-no'}`;
+        statusBadge.textContent = isBlacklisted ? "Blacklisted" : "Active";
+        statusTd.appendChild(statusBadge);
+
+        const actionTd = document.createElement("td");
+        const btn = document.createElement("button");
+        btn.className = `action-btn ${isBlacklisted ? 'btn-unblacklist' : 'btn-blacklist'}`;
+        btn.textContent = isBlacklisted ? "Unblacklist" : "Blacklist";
+        btn.addEventListener("click", () => {
+          isBlacklisted ? unBlacklist(student._id) : blacklist(student._id);
+        });
+        actionTd.appendChild(btn);
+
+        tr.appendChild(nameTd);
+        tr.appendChild(enrollmentTd);
+        tr.appendChild(statusTd);
+        tr.appendChild(actionTd);
+
+        table.appendChild(tr);
+      });
+    }
+
+    async function blacklist(id) {
+      await fetch(`/api/colleges/blacklist/${id}`, {
+        method: "POST",
+        credentials: "include"
+      });
+      loadStudents();
+    }
+
+    async function unBlacklist(id) {
+      await fetch(`/api/colleges/unblacklist/${id}`, {
+        method: "POST",
+        credentials: "include"
+      });
+      loadStudents();
+    }
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      const filtered = allStudents.filter(student =>
+        student.name.toLowerCase().includes(searchTerm) ||
+        student.enrollment_no.toLowerCase().includes(searchTerm)
+      );
+      renderStudents(filtered);
     });
 
-    tr.children[3].appendChild(btn);
-    table.appendChild(tr);
-  });
-}
-
-  async function blacklist(id) {
-    await fetch(`/api/colleges/blacklist/${id}`, {
-      method: "POST",
-      credentials: "include"
-    });
     loadStudents();
-  }
-
-  async function unBlacklist(id) {
-    await fetch(`/api/colleges/unblacklist/${id}`, {
-      method: "POST",
-      credentials: "include"
-    });
-    loadStudents();
-  }
-
-  loadStudents();
-</script>
-
+  </script>
 </body>
+
 </html>

@@ -1,31 +1,517 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>College Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: white;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    .sidebar-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 25px 20px;
+      color: white;
+    }
+
+    .sidebar-header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .sidebar-header p {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .sidebar nav {
+      padding: 20px 0;
+    }
+
+    .sidebar nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 15px;
+      font-weight: 500;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar nav a:hover {
+      background: #f8f9fa;
+      border-left-color: #667eea;
+    }
+
+    .sidebar nav a.active {
+      background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+      color: #667eea;
+      border-left-color: #667eea;
+    }
+
+    .sidebar nav a span:first-child {
+      font-size: 18px;
+      width: 24px;
+      text-align: center;
+    }
+
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      min-height: 100vh;
+    }
+
+    .top-bar {
+      background: white;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .top-bar h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+
+    .logout-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .logout-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .content-area {
+      padding: 30px;
+    }
+
+    .stats-bar {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 18px 24px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      font-size: 14px;
+      color: #555;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    .stat-card.highlighted {
+      border: 2px solid #667eea;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+      color: #667eea;
+      font-weight: 600;
+    }
+
+    .stat-card strong {
+      color: #333;
+      font-weight: 600;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .job-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+    }
+
+    .job-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    }
+
+    .job-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .company-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .company-name {
+      font-size: 17px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .job-details {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+
+    .job-meta {
+      display: flex;
+      gap: 15px;
+      margin: 12px 0;
+      font-size: 12px;
+      color: #888;
+    }
+
+    .job-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .view-details {
+      color: #667eea;
+      font-size: 13px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 16px;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .view-details:hover {
+      color: #764ba2;
+    }
+
+    .job-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-approve {
+      background: #27ae60;
+      color: white;
+      box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+    }
+
+    .btn-approve:hover {
+      background: #229954;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
+    }
+
+    .btn-reject {
+      background: #e74c3c;
+      color: white;
+      box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+    }
+
+    .btn-reject:hover {
+      background: #c0392b;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+    }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #333;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h1>College Dashboard</h1>
+      <p>Placement Management System</p>
+    </div>
+    <nav>
+      <a href="#" class="active">
+        <span>📊</span>
+        <span>Overview</span>
+      </a>
+      <a href="/college/profile">
+        <span>🏛️</span>
+        <span>College Profile</span>
+      </a>
+      <a href="/college/students">
+        <span>👥</span>
+        <span>Student Management</span>
+      </a>
+      <a href="/college/jobs">
+        <span>💼</span>
+        <span>Job Postings</span>
+      </a>
+      <a href="/college/reports">
+        <span>📈</span>
+        <span>Reports</span>
+      </a>
+    </nav>
+  </aside>
 
-<h2>College Dashboard</h2>
+  <main class="main-content">
+    <div class="top-bar">
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <h2>Dashboard Overview</h2>
+      </div>
+      <div class="top-bar-right">
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
 
-<ul>
-  <li><a href="/college/profile">View Profile</a></li>
-  <li><a href="/college/students">View Students</a></li>
+    <div class="content-area">
+      <div class="stats-bar">
+        <div class="stat-card">
+          Total Students: <strong>1,200</strong>
+        </div>
+        <div class="stat-card highlighted">
+          Pending Job Approvals
+        </div>
+        <div class="stat-card">
+          Active Job Postings: <strong>12</strong>
+        </div>
+        <div class="stat-card">
+          Placed Students: <strong>450 (37.5%)</strong>
+        </div>
+      </div>
 
-</ul>
+      <h2 class="section-title">Job Approval Queue</h2>
 
-<button onclick="logout()">Logout</button>
+      <div class="cards-grid">
+        <div class="job-card">
+          <div class="job-card-header">
+            <div class="company-icon">G</div>
+            <div class="company-name">Google</div>
+          </div>
+          <div class="job-details">Role: LPA</div>
+          <div class="job-details">Target Departments</div>
+          <div class="job-meta">
+            <span>• CS, IT</span>
+            <span>Deadline: 16:00</span>
+          </div>
+          <a href="#" class="view-details">🔍 View Details</a>
+          <div class="job-actions">
+            <button class="btn btn-approve">Approve</button>
+            <button class="btn btn-reject">Reject</button>
+          </div>
+        </div>
 
-<script>
-  async function logout() {
-    await fetch("/api/auth/logout", {
-      method: "POST",
-      credentials: "include"
-    });
+        <div class="job-card">
+          <div class="job-card-header">
+            <div class="company-icon">I</div>
+            <div class="company-name">Innovate Corp</div>
+          </div>
+          <div class="job-details">Role: LPA</div>
+          <div class="job-details">Target Departments</div>
+          <div class="job-meta">
+            <span>• CS, IT</span>
+            <span>Deadline: 19:00</span>
+          </div>
+          <a href="#" class="view-details">🔍 View Details</a>
+          <div class="job-actions">
+            <button class="btn btn-approve">Approve</button>
+            <button class="btn btn-reject">Reject</button>
+          </div>
+        </div>
 
-    window.location.href = "/login";
-  }
-</script>
+        <div class="job-card">
+          <div class="job-card-header">
+            <div class="company-icon">I</div>
+            <div class="company-name">Innovate</div>
+          </div>
+          <div class="job-details">Role: LPA</div>
+          <div class="job-details">Target Departments</div>
+          <div class="job-meta">
+            <span>• CS, IT</span>
+            <span>Deadline: 18:00</span>
+          </div>
+          <a href="#" class="view-details">🔍 View Details</a>
+          <div class="job-actions">
+            <button class="btn btn-approve">Approve</button>
+            <button class="btn btn-reject">Reject</button>
+          </div>
+        </div>
 
+        <div class="job-card">
+          <div class="job-card-header">
+            <div class="company-icon">F</div>
+            <div class="company-name">FutureTech Solutions</div>
+          </div>
+          <div class="job-details">Role: LPA</div>
+          <div class="job-details">Target Departments</div>
+          <div class="job-meta">
+            <span>• CS, IT</span>
+            <span>Deadline: 18:00</span>
+          </div>
+          <a href="#" class="view-details">🔍 View Details</a>
+          <div class="job-actions">
+            <button class="btn btn-approve">Approve</button>
+            <button class="btn btn-reject">Reject</button>
+          </div>
+        </div>
 
+        <div class="job-card">
+          <div class="job-card-header">
+            <div class="company-icon">G</div>
+            <div class="company-name">GlobeTech Solutions</div>
+          </div>
+          <div class="job-details">Role: LPA</div>
+          <div class="job-details">Target Departments</div>
+          <div class="job-meta">
+            <span>• CS, IT</span>
+            <span>Deadline: 18:00</span>
+          </div>
+          <a href="#" class="view-details">🔍 View Details</a>
+          <div class="job-actions">
+            <button class="btn btn-approve">Approve</button>
+            <button class="btn btn-reject">Reject</button>
+          </div>
+        </div>
+
+        <div class="job-card">
+          <div class="job-card-header">
+            <div class="company-icon">C</div>
+            <div class="company-name">Creative Labs</div>
+          </div>
+          <div class="job-details">Role: LPA</div>
+          <div class="job-details">Target Departments</div>
+          <div class="job-meta">
+            <span>• CS, IT</span>
+            <span>Deadline: 18:00</span>
+          </div>
+          <a href="#" class="view-details">🔍 View Details</a>
+          <div class="job-actions">
+            <button class="btn btn-approve">Approve</button>
+            <button class="btn btn-reject">Reject</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    async function logout() {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include"
+      });
+      window.location.href = "/login";
+    }
+  </script>
 </body>
 </html>

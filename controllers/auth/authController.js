@@ -75,7 +75,7 @@ export const login=async(req, res)=>{
             return res.json({success: false, message:"invalid password"});
         }
 
-        const token= jwt.sign({id: user._id, role:user.role}, process.env.JWT_SECRET, {expiresIn: '1d'});
+        const token= jwt.sign({id: user._id, role:user.role, email:user.email}, process.env.JWT_SECRET, {expiresIn: '1d'});
 
         res.cookie('token',token,{
             maxAge: 7 * 24 * 60 * 60 * 1000
