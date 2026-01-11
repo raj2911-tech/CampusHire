@@ -468,7 +468,7 @@
       <p id="msg" class="message"></p>
 
       <div class="login-link">
-        <a href="/">Already have an account? Login</a>
+        <a href="/login">Already have an account? Login</a>
       </div>
     </div>
   </div>
@@ -612,7 +612,7 @@
           msg.innerText = data.message || "Registration successful! Redirecting...";
           msg.style.display = "block";
           setTimeout(() => {
-            window.location.href = "/";
+            window.location.href = "/register";
           }, 2000);
         } else {
           msg.className = "message error";
