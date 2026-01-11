@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import authRouter from "../routes/auth/authRoutes.js";
 import pageRoutes from "../routes/page/pageRoutes.js";
 import collegeRoutes from "../routes/college/collegeRoutes.js";
@@ -10,7 +11,7 @@ const app = express();
 
 // Parse JSON body
 app.use(express.json());
-
+app.use(cookieParser());
 // Enable CORS
 app.use(cors());
 // EJS

@@ -11,8 +11,17 @@ router.get("/login", (req, res) => {
   res.render("auth/login");
 });
 
-router.get("/dashboard",protect, (req, res) => {
+router.get("/college/dashboard", protect, (req, res) => {
   res.render("college/dashboard");
 });
+
+router.get("/college/profile", protect, (req, res) => {
+  res.render("college/profile");
+});
+
+router.get("/college/students", protect, (req, res) => {
+  res.render("college/students");
+});
+
 
 export default router;

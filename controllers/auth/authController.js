@@ -78,12 +78,6 @@ export const login=async(req, res)=>{
         const token= jwt.sign({id: user._id, role:user.role}, process.env.JWT_SECRET, {expiresIn: '1d'});
 
         res.cookie('token',token,{
-            httpOnly:true,
-            // change if it is in production environment. change this with env file
-            secure: process.env.NODE_ENV === 'production',
-            // if fronted and backend running on same server change it to 'strict' 
-            sameSite: process.env.NODE_ENV === 'production' ?
-            'none' : 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
@@ -101,5 +95,6 @@ export const logout=async(req, res)=>{
     res.clearCookie("token").json({
         success: true,
         message: "Logout successful"
-      });
+    });
+    return res.redirect('/login');
 };

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>College Profile</title>
+</head>
+<body>
+
+<h2>College Profile</h2>
+
+<pre id="profile"></pre>
+
+<a href="/college/dashboard">Back</a>
+
+<script>
+  async function loadProfile() {
+    const res = await fetch("/api/colleges/profile", {
+      credentials: "include"
+    });
+    const data = await res.json();
+    document.getElementById("profile").innerText =
+      JSON.stringify(data.profile, null, 2);
+  }
+
+  loadProfile();
+</script>
+
+</body>
+</html>

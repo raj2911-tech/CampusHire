@@ -5,7 +5,7 @@ export const getProfile = async (req, res) => {
   const  id  = req.user.id;
 
   try {
-    const profile = await collegeModel.findById(id);
+    const profile = await collegeModel.findOne({ userId: id });
 
     if (!profile) {
       return res.status(404).json({
@@ -30,6 +30,8 @@ export const getProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
     const  id  = req.user.id;
     const { name, placementOfficer } = req.body;
+
+ 
   
     try {
       if (!name || !placementOfficer) {
@@ -40,7 +42,7 @@ export const updateProfile = async (req, res) => {
       }
   
       const result = await collegeModel.updateOne(
-        { _id: id },                 // filter
+        { userId: id },                 // filter
         { $set: { name, placementOfficer } } // update
       );
   
@@ -65,9 +67,19 @@ export const updateProfile = async (req, res) => {
   };
 
 export const viewStudents = async (req, res) => {
-    const collegeId = req.user.id;
+    const userId = req.user.id;
+    
     try {
-        const students = await studentModel.find({ collegeId },{enrollment_no:1, name:2, blacklistedBy:3});
+      const college= await collegeModel.findOne({userId});
+      
+      if(!college){
+        return res.status(404).json({
+          success: false,
+          message: "College not found"
+        });
+      }
+      const collegeId=college._id.toString();
+      const students = await studentModel.find({ collegeId },{enrollment_no:1, name:2, blacklistedBy:3});
 
         res.json({
             success: true,
@@ -78,4 +90,82 @@ export const viewStudents = async (req, res) => {
     catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
+};
+
+export const blackList = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const college = await collegeModel.findOne({ userId });
+    if (!college) {
+      return res.status(404).json({
+        success: false,
+        message: "College not found"
+      });
+    }
+
+    const student = await studentModel.findByIdAndUpdate(
+      id,
+      { $addToSet: { blacklistedBy: college._id } }, 
+      { new: true }
+    );
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      blacklistedBy: student.blacklistedBy 
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+export const unBlackList = async (req, res) => {
+  const { id } = req.params; // studentId
+  const userId = req.user.id;
+
+  try {
+    const college = await collegeModel.findOne({ userId });
+    if (!college) {
+      return res.status(404).json({
+        success: false,
+        message: "College not found"
+      });
+    }
+
+    const student = await studentModel.findByIdAndUpdate(
+      id,
+      { $pull: { blacklistedBy: college._id } }, 
+      { new: true }
+    );
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      blacklistedBy: student.blacklistedBy
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
 };

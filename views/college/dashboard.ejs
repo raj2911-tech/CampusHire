@@ -1,18 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>College Dashboard (Test)</title>
+  <title>College Dashboard</title>
 </head>
 <body>
 
-  <h2>College Dashboard (Testing)</h2>
+<h2>College Dashboard</h2>
 
-  <button onclick="loadProfile()">View Profile</button>
-  <button onclick="loadStudents()">View Students</button>
+<ul>
+  <li><a href="/college/profile">View Profile</a></li>
+  <li><a href="/college/students">View Students</a></li>
 
-  <pre id="output"></pre>
+</ul>
 
-  
+<button onclick="logout()">Logout</button>
+
+<script>
+  async function logout() {
+    await fetch("/api/auth/logout", {
+      method: "POST",
+      credentials: "include"
+    });
+
+    window.location.href = "/login";
+  }
+</script>
+
 
 </body>
 </html>
