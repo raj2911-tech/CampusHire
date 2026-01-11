@@ -2,47 +2,274 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      width: 100%;
+      max-width: 400px;
+      animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .login-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px 30px;
+      text-align: center;
+      color: white;
+    }
+
+    .login-header h2 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .login-header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .login-body {
+      padding: 40px 30px;
+    }
+
+    .input-group {
+      margin-bottom: 25px;
+      position: relative;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .input-group input:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .input-group input::placeholder {
+      color: #aaa;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+
+    .login-btn:active {
+      transform: translateY(0);
+    }
+
+    .login-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .message {
+      margin-top: 20px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+
+    .forgot-password {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .forgot-password a {
+      color: #667eea;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .forgot-password a:hover {
+      color: #764ba2;
+      text-decoration: underline;
+    }
+
+    .icon {
+      position: absolute;
+      right: 16px;
+      top: 42px;
+      color: #aaa;
+      font-size: 18px;
+    }
+  </style>
 </head>
 <body>
-  <h2>Login</h2>
+  <div class="login-container">
+    <div class="login-header">
+      <h2>Welcome Back</h2>
+      <p>Please login to your account</p>
+    </div>
 
-  <form id="loginForm">
-    <input type="email" id="email" placeholder="Email" required />
-    <br /><br />
-    <input type="password" id="password" placeholder="Password" required />
-    <br /><br />
-    <button type="submit">Login</button>
-  </form>
+    <div class="login-body">
+      <div class="input-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" placeholder="Enter your email" required />
+      </div>
 
-  <p id="msg"></p>
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password" required />
+      </div>
+
+      <button type="button" id="loginBtn" class="login-btn">Login</button>
+
+      <p id="msg" class="message"></p>
+
+      <div class="forgot-password">
+        <a href="/register">Don't have an account? Register</a>
+      </div>
+    </div>
+  </div>
 
   <script>
-    const form = document.getElementById("loginForm");
+    const loginBtn = document.getElementById("loginBtn");
     const msg = document.getElementById("msg");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    loginBtn.addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
 
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        msg.innerText = "Login successful";
-        window.location.href = "/college/dashboard";
-        // later redirect based on role
-      } else {
-        msg.innerText = data.message;
+      if (!email || !password) {
+        msg.className = "message error";
+        msg.innerText = "Please fill in all fields";
+        return;
       }
+
+      loginBtn.disabled = true;
+      loginBtn.innerText = "Logging in...";
+      msg.className = "message";
+      msg.style.display = "none";
+
+      try {
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          msg.className = "message success";
+          msg.innerText = "Login successful! Redirecting...";
+          msg.style.display = "block";
+          setTimeout(() => {
+            window.location.href = "/college/dashboard";
+          }, 1000);
+        } else {
+          msg.className = "message error";
+          msg.innerText = data.message || "Invalid email or password. Please try again.";
+          msg.style.display = "block";
+          loginBtn.disabled = false;
+          loginBtn.innerText = "Login";
+        }
+      } catch (error) {
+        msg.className = "message error";
+        msg.innerText = "An error occurred. Please try again.";
+        msg.style.display = "block";
+        loginBtn.disabled = false;
+        loginBtn.innerText = "Login";
+      }
+    });
+
+    // Allow Enter key to submit
+    [emailInput, passwordInput].forEach(input => {
+      input.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          loginBtn.click();
+        }
+      });
     });
   </script>
 </body>
