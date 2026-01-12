@@ -301,6 +301,27 @@
       transform: translateX(-100%);
     }
 
+    .action-wrapper {
+      display: flex;
+      gap: 12px;
+      /* space between buttons */
+      align-items: center;
+    }
+
+    /* View button styling */
+    .btn-view {
+      background: #3498db;
+      color: white;
+      box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-view:hover {
+      background: #2c80b4;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(52, 152, 219, 0.4);
+    }
+
+
     @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
@@ -468,13 +489,35 @@
         statusTd.appendChild(statusBadge);
 
         const actionTd = document.createElement("td");
+
+        // wrapper for buttons
+        const actionWrapper = document.createElement("div");
+        actionWrapper.className = "action-wrapper";
+
+        // Blacklist / Unblacklist button
         const btn = document.createElement("button");
         btn.className = `action-btn ${isBlacklisted ? 'btn-unblacklist' : 'btn-blacklist'}`;
         btn.textContent = isBlacklisted ? "Unblacklist" : "Blacklist";
         btn.addEventListener("click", () => {
           isBlacklisted ? unBlacklist(student._id) : blacklist(student._id);
         });
-        actionTd.appendChild(btn);
+
+        // View button
+        const viewBtn = document.createElement("button");
+        viewBtn.className = "action-btn btn-view";
+        viewBtn.textContent = "View";
+        viewBtn.addEventListener("click", () => {
+          window.location.href = `/college/student/${student._id}`;
+        });
+
+        // append buttons to wrapper
+        actionWrapper.appendChild(btn);
+        actionWrapper.appendChild(viewBtn);
+
+        // append wrapper to td
+        actionTd.appendChild(actionWrapper);
+
+
 
         tr.appendChild(nameTd);
         tr.appendChild(enrollmentTd);
@@ -510,6 +553,8 @@
       );
       renderStudents(filtered);
     });
+
+
 
     loadStudents();
   </script>

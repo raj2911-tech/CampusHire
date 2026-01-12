@@ -27,4 +27,8 @@ router.get("/college/profile/edit", protect, (req, res) => {
     res.render("college/editProfile");
 });
 
+router.get("/college/student/:id", protect, (req, res) => {
+  res.render("college/studentDetails");
+});
+
 export default router;

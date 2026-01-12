@@ -171,3 +171,25 @@ export const unBlackList = async (req, res) => {
     });
   }
 };
+
+export const getStudent = async (req,res) =>{
+  const {id}= req.params;
+  try {
+    const student= await studentModel.findById(id);
+    if(!student){
+      return res.status(404).json({
+        success: false,
+        message: "Student not found"
+      });
+    }
+    res.status(200).json({
+      success: true,
+      student
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Details</title>
+</head>
+<body>
+
+  <h2>Student Details</h2>
+
+  <div id="content">
+    <p>Loading student data...</p>
+  </div>
+
+  <script>
+    // extract studentId from URL
+    const studentId = window.location.pathname.split("/").pop();
+
+    async function loadStudent() {
+      try {
+        const res = await fetch(`/api/colleges/student/${studentId}`, {
+          credentials: "include"
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch student");
+        }
+
+        const data = await res.json();
+        const student = data.student;
+
+        document.getElementById("content").innerHTML = `
+          <table border="1" cellpadding="8" cellspacing="0">
+            <tr>
+              <th>Name</th>
+              <td>${student.name}</td>
+            </tr>
+
+            <tr>
+              <th>Enrollment Number</th>
+              <td>${student.enrollment_no}</td>
+            </tr>
+
+            <tr>
+              <th>Email</th>
+              <td>${student.email}</td>
+            </tr>
+
+            <tr>
+              <th>Branch</th>
+              <td>${student.academics.branch}</td>
+            </tr>
+
+            <tr>
+              <th>CGPA</th>
+              <td>${student.academics.cgpa}</td>
+            </tr>
+
+            <tr>
+              <th>Graduation Year</th>
+              <td>${student.academics.graduationYear}</td>
+            </tr>
+
+            <tr>
+              <th>Skills</th>
+              <td>
+                ${
+                  student.academics.skills.length === 0
+                    ? "Not added"
+                    : `<ul>${student.academics.skills
+                        .map(skill => `<li>${skill}</li>`)
+                        .join("")}</ul>`
+                }
+              </td>
+            </tr>
+
+            <tr>
+              <th>Placement Status</th>
+              <td>${student.isPlaced ? "Placed" : "Not Placed"}</td>
+            </tr>
+
+            <tr>
+              <th>Blacklist Status</th>
+              <td>${student.blacklistedBy.length > 0 ? "Blacklisted" : "Active"}</td>
+            </tr>
+
+            <tr>
+              <th>Created At</th>
+              <td>${new Date(student.createdAt).toLocaleString()}</td>
+            </tr>
+
+            <tr>
+              <th>Last Updated</th>
+              <td>${new Date(student.updatedAt).toLocaleString()}</td>
+            </tr>
+          </table>
+
+          <br />
+          <a href="/college/students">← Back to Students</a>
+        `;
+      } catch (err) {
+        document.getElementById("content").innerHTML =
+          "<p>⚠️ Failed to load student details</p>";
+      }
+    }
+
+    loadStudent();
+  </script>
+
+</body>
+</html>
