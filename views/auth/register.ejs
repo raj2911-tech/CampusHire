@@ -451,11 +451,6 @@
                 <label>Contact Email</label>
                 <input id="contactEmail" type="email" placeholder="e.g. hr@company.com">
               </div>
-        
-              <div class="input-group">
-                <label>Contact Mobile</label>
-                <input id="contactMobile" type="tel" placeholder="e.g. +91 9876543210">
-              </div>
             </div>
         
           </div>
@@ -575,7 +570,6 @@
         const specialties = document.getElementById("specialties").value;
         const contactName = document.getElementById("contactName").value;
         const contactEmail = document.getElementById("contactEmail").value;
-        const contactMobile = document.getElementById("contactMobile").value;
 
         payload = {
           ...payload,
@@ -587,7 +581,6 @@
           contactPerson: {
             name: contactName,
             email: contactEmail,
-            mobile: contactMobile
           }
         };
       }

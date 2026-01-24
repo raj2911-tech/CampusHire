@@ -240,12 +240,15 @@
 
         const data = await res.json();
 
-        if (data.success) {
+        if (data.success ) {
+          let role=data.role;
+          role=role.toLowerCase();
+
           msg.className = "message success";
           msg.innerText = "Login successful! Redirecting...";
           msg.style.display = "block";
           setTimeout(() => {
-            window.location.href = "/college/dashboard";
+            window.location.href = `/${role}/dashboard`;
           }, 1000);
         } else {
           msg.className = "message error";

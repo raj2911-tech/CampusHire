@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Details</title>
+  <title>Company Profile</title>
   <style>
     * {
       margin: 0;
@@ -26,7 +26,6 @@
       overflow-y: auto;
       z-index: 100;
       transition: transform 0.3s ease;
-      transform: translateX(0);
     }
 
     .sidebar.collapsed {
@@ -113,6 +112,12 @@
       color: #333;
     }
 
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
     .back-btn {
       background: #f8f9fa;
       color: #333;
@@ -133,13 +138,33 @@
       background: #e9ecef;
     }
 
-    .content-area {
-      padding: 30px;
-      max-width: 1000px;
-      margin: 0 auto;
+    .edit-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .student-header {
+    .edit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .content-area {
+      padding: 30px;
+    }
+
+    .profile-header {
       background: white;
       border-radius: 12px;
       padding: 30px;
@@ -150,46 +175,58 @@
       gap: 24px;
     }
 
-    .student-avatar {
-      width: 80px;
-      height: 80px;
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 32px;
+      font-size: 40px;
       font-weight: 600;
       flex-shrink: 0;
     }
 
-    .student-info {
+    .profile-info {
       flex: 1;
     }
 
-    .student-name {
-      font-size: 24px;
+    .profile-name {
+      font-size: 28px;
       font-weight: 600;
       color: #333;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
-    .student-meta {
+    .profile-email {
+      font-size: 16px;
+      color: #667eea;
+      margin-bottom: 12px;
+    }
+
+    .profile-meta {
       display: flex;
       gap: 20px;
-      font-size: 14px;
+      font-size: 13px;
       color: #666;
       flex-wrap: wrap;
     }
 
-    .details-grid {
+    .profile-meta span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .profile-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: 1fr;
       gap: 20px;
     }
 
-    .detail-card {
+    .profile-card {
       background: white;
       border-radius: 12px;
       padding: 24px;
@@ -225,7 +262,7 @@
 
     .info-row {
       display: flex;
-      padding: 10px 0;
+      padding: 12px 0;
       border-bottom: 1px solid #f5f5f5;
     }
 
@@ -246,63 +283,32 @@
       flex: 1;
     }
 
-    .skills-list {
-      list-style: none;
+    .specialties-list {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      margin-top: 8px;
     }
 
-    .skill-tag {
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    .specialty-tag {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
       color: #667eea;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    .status-badge {
-      display: inline-block;
-      padding: 6px 12px;
-      border-radius: 6px;
+      padding: 6px 14px;
+      border-radius: 16px;
       font-size: 13px;
       font-weight: 600;
-    }
-
-    .status-placed {
-      background: #d4edda;
-      color: #155724;
-    }
-
-    .status-not-placed {
-      background: #fff3cd;
-      color: #856404;
-    }
-
-    .status-active {
-      background: #d4edda;
-      color: #155724;
-    }
-
-    .status-blacklisted {
-      background: #f8d7da;
-      color: #721c24;
+      border: 2px solid rgba(102, 126, 234, 0.2);
     }
 
     .loading {
       text-align: center;
       padding: 60px 20px;
-      color: white;
+      color: #667eea;
       font-size: 16px;
     }
 
     .error {
-      background: white;
-      border-radius: 12px;
-      padding: 40px;
       text-align: center;
+      padding: 60px 20px;
       color: #e74c3c;
       font-size: 16px;
     }
@@ -350,21 +356,26 @@
         margin-left: 0;
       }
 
+      .main-content.expanded {
+        margin-left: 0;
+      }
+
       .overlay.active {
         display: block;
       }
 
-      .details-grid {
+      .profile-grid {
         grid-template-columns: 1fr;
       }
 
-      .student-header {
+      .profile-header {
         flex-direction: column;
         text-align: center;
       }
 
-      .student-meta {
-        justify-content: center;
+      .profile-meta {
+        flex-direction: column;
+        align-items: center;
       }
 
       .info-row {
@@ -375,35 +386,39 @@
       .info-label {
         min-width: auto;
       }
+
+      .top-bar-right {
+        gap: 10px;
+      }
     }
   </style>
 </head>
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <h1>College Dashboard</h1>
+      <h1>Company Portal</h1>
       <p>Placement Management System</p>
     </div>
     <nav>
-      <a href="/college/dashboard">
+      <a href="/company/dashboard">
         <span>📊</span>
         <span>Overview</span>
       </a>
-      <a href="/college/profile">
-        <span>🏛️</span>
-        <span>College Profile</span>
+      <a href="/company/profile" class="active">
+        <span>🏢</span>
+        <span>Company Profile</span>
       </a>
-      <a href="/college/students" class="active">
-        <span>👥</span>
-        <span>Student Management</span>
+      <a href="/company/jobs/create">
+        <span>➕</span>
+        <span>Create Job</span>
       </a>
-      <a href="/college/jobs">
+      <a href="/company/jobs">
         <span>💼</span>
-        <span>Job Postings</span>
+        <span>My Job Postings</span>
       </a>
-      <a href="/college/reports">
-        <span>📈</span>
-        <span>Reports</span>
+      <a href="/company/applications">
+        <span>📝</span>
+        <span>Applications</span>
       </a>
     </nav>
   </aside>
@@ -414,14 +429,17 @@
     <div class="top-bar">
       <div style="display: flex; align-items: center; gap: 15px;">
         <button class="menu-toggle" type="button">☰</button>
-        <h2>Student Details</h2>
+        <h2>Company Profile</h2>
       </div>
-      <a href="/college/students" class="back-btn">← Back to Students</a>
+      <div class="top-bar-right">
+        <a href="/company/profile/edit" class="edit-btn">✏️ Edit Profile</a>
+        <a href="/company/dashboard" class="back-btn">← Back</a>
+      </div>
     </div>
 
     <div class="content-area">
-      <div id="content">
-        <div class="loading">Loading student data...</div>
+      <div id="profileContent">
+        <div class="loading">Loading profile...</div>
       </div>
     </div>
   </main>
@@ -459,105 +477,134 @@
       }
     });
 
-    const studentId = window.location.pathname.split("/").pop();
-
-    async function loadStudent() {
+    async function loadProfile() {
       try {
-        const res = await fetch(`/api/colleges/student/${studentId}`, {
+        const res = await fetch("/api/companies/profile", {
           credentials: "include"
         });
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch student");
-        }
-
         const data = await res.json();
-        const student = data.student;
+    
 
-        const firstLetter = student.name.charAt(0).toUpperCase();
-        const skillsHTML = student.academics.skills.length === 0
-          ? '<span style="color: #999;">No skills added</span>'
-          : `<div class="skills-list">${student.academics.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}</div>`;
-
-        document.getElementById("content").innerHTML = `
-          <div class="student-header">
-            <div class="student-avatar">${firstLetter}</div>
-            <div class="student-info">
-              <div class="student-name">${student.name}</div>
-              <div class="student-meta">
-                <span>${student.email}</span>
-                <span> Enrollment Number: ${student.enrollment_no}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="details-grid">
-            <div class="detail-card">
-              <div class="card-header">
-                <div class="card-icon">📚</div>
-                <div class="card-title">Academic Information</div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">Branch:</div>
-                <div class="info-value">${student.academics.branch}</div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">CGPA:</div>
-                <div class="info-value">${student.academics.cgpa}</div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">Graduation Year:</div>
-                <div class="info-value">${student.academics.graduationYear}</div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">Skills:</div>
-                <div class="info-value">${skillsHTML}</div>
-              </div>
-            </div>
-
-            <div class="detail-card">
-              <div class="card-header">
-                <div class="card-icon">💼</div>
-                <div class="card-title">Placement Status</div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">Placement:</div>
-                <div class="info-value">
-                  <span class="status-badge ${student.isPlaced ? 'status-placed' : 'status-not-placed'}">
-                    ${student.isPlaced ? 'Placed' : 'Not Placed'}
-                  </span>
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">Blacklist:</div>
-                <div class="info-value">
-                  <span class="status-badge ${student.blacklistedBy.length > 0 ? 'status-blacklisted' : 'status-active'}">
-                    ${student.blacklistedBy.length > 0 ? 'Blacklisted' : 'Active'}
-                  </span>
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">Created At:</div>
-                <div class="info-value">${new Date(student.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">Last Updated:</div>
-                <div class="info-value">${new Date(student.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
-              </div>
-            </div>
-          </div>
-        `;
-      } catch (err) {
-        document.getElementById("content").innerHTML = `
-          <div class="error">
-            <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
-            <div>Failed to load student details</div>
-          </div>
-        `;
+        if (data.success && data.profile && data.email) {
+          displayProfile(data.profile, data.email);
+        } else {
+          document.getElementById("profileContent").innerHTML = 
+            '<div class="error">Failed to load profile</div>';
+        }
+      } catch (error) {
+        document.getElementById("profileContent").innerHTML = 
+          '<div class="error">Error loading profile. Please try again.</div>';
       }
     }
 
-    loadStudent();
+    function displayProfile(profile, email) {
+      const contentDiv = document.getElementById("profileContent");
+      
+      const initials = profile.name ? 
+        profile.name.split(' ').map(word => word[0]).join('').substring(0, 2).toUpperCase() : 
+        'CO';
+      
+      const createdDate = profile.createdAt ? 
+        new Date(profile.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 
+        'N/A';
+      
+      const updatedDate = profile.updatedAt ? 
+        new Date(profile.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 
+        'N/A';
+
+      const specialtiesHtml = profile.specialties && profile.specialties.length > 0 ?
+        profile.specialties.map(s => `<span class="specialty-tag">${s}</span>`).join('') :
+        '<span style="color: #999; font-style: italic;">No specialties added</span>';
+
+      contentDiv.innerHTML = `
+        <div class="profile-header">
+          <div class="profile-avatar">${initials}</div>
+          <div class="profile-info">
+            <div class="profile-name">${profile.name || 'N/A'}</div>
+            <div class="profile-email">${email}</div>
+            <div class="profile-meta">
+              <span>🏭 ${profile.industry || 'Not specified'}</span>
+              <span>📅 Founded: ${profile.foundedYear || 'N/A'}</span>
+              <span>🔄 Last Updated: ${updatedDate}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-grid">
+          <!-- Company Details -->
+          <div class="profile-card">
+            <div class="card-header">
+              <div class="card-icon">🏢</div>
+              <div class="card-title">Company Details</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Company Name:</div>
+              <div class="info-value">${profile.name || 'N/A'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Email Address:</div>
+              <div class="info-value">${email}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Industry:</div>
+              <div class="info-value">${profile.industry || 'N/A'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Founded Year:</div>
+              <div class="info-value">${profile.foundedYear || 'N/A'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Company ID:</div>
+              <div class="info-value">${profile._id || 'N/A'}</div>
+            </div>
+          </div>
+
+          <!-- About Company -->
+          <div class="profile-card">
+            <div class="card-header">
+              <div class="card-icon">📝</div>
+              <div class="card-title">About Company</div>
+            </div>
+            <div class="info-row">
+              <div class="info-value" style="line-height: 1.6;">
+                ${profile.about || 'No description provided'}
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Person -->
+          ${profile.contactPerson ? `
+          <div class="profile-card">
+            <div class="card-header">
+              <div class="card-icon">👤</div>
+              <div class="card-title">Contact Person</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Name:</div>
+              <div class="info-value">${profile.contactPerson.name || 'N/A'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Email:</div>
+              <div class="info-value">${profile.contactPerson.email || 'N/A'}</div>
+            </div>
+          </div>
+          ` : ''}
+
+          <!-- Specialties -->
+          <div class="profile-card">
+            <div class="card-header">
+              <div class="card-icon">🎯</div>
+              <div class="card-title">Specialties</div>
+            </div>
+            <div class="specialties-list">
+              ${specialtiesHtml}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    loadProfile();
   </script>
 </body>
 </html>
