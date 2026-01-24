@@ -1,4 +1,6 @@
 import companyModel from "../../models/companies.js";
+import collegeModel from "../../models/colleges.js";
+import jobModel from "../../models/jobs.js";
 
 
 export const getProfile = async (req, res) => {
@@ -83,3 +85,46 @@ export const updateProfile = async (req, res) => {
     }
   };
 
+export const createJob = async (req, res) => {
+    const userId = req.user.id;
+    const { collegeId, title, description, salary, deadline, eligibility } = req.body;
+  
+    if (!collegeId || !title || !description || !salary || !deadline || !eligibility) {
+      return res.status(400).json({ success: false, message: "Missing details" });
+    }
+  
+    try {
+      // Find company
+      const company = await companyModel.findOne({ userId });
+      if (!company) {
+        return res.status(404).json({ success: false, message: "Company not found" });
+      }
+  
+      // Validate college
+      const college = await collegeModel.findById(collegeId);
+      if (!college) {
+        return res.status(400).json({ success: false, message: "Invalid college" });
+      }
+  
+      const job = await jobModel.create({
+        companyId: company._id,
+        collegeId,
+        title,
+        description,
+        salary: Number(salary),
+        deadline: new Date(deadline),
+        eligibility,
+        status: "PENDING"
+      });
+  
+      return res.status(201).json({
+        success: true,
+        message: "Job created successfully",
+        job
+      });
+  
+    } catch (error) {
+      return res.status(500).json({ success: false, message: error.message });
+    }
+  };
+  

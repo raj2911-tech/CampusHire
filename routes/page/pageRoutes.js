@@ -47,4 +47,16 @@ router.get("/company/profile", protect, (req, res) => {
 router.get("/company/profile/edit", protect, (req, res) => {
   res.render("company/editProfile");
 });
+
+router.get("/company/jobs/create", protect, (req, res) => {
+  res.render("company/createJob");
+});
+
+router.get("/company/jobs", protect, (req, res) => {
+  res.render("company/jobs");
+});
+
+
+
+
 export default router;

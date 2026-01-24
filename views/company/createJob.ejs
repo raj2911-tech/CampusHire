@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Job</title>
+</head>
+<body>
+
+<h2>Create Job</h2>
+
+<form id="jobForm">
+
+  <!-- College Dropdown -->
+  <label>Select College</label><br />
+  <select id="collegeId" required>
+    <option value="">Loading colleges...</option>
+  </select>
+  <br /><br />
+
+  <label>Job Title</label><br />
+  <input type="text" id="title" required />
+  <br /><br />
+
+  <label>Description</label><br />
+  <textarea id="description" required></textarea>
+  <br /><br />
+
+  <label>Salary (CTC)</label><br />
+  <input type="number" id="salary" required />
+  <br /><br />
+
+  <label>Deadline</label><br />
+  <input type="date" id="deadline" required />
+  <br /><br />
+
+  <h4>Eligibility</h4>
+
+  <label>Min CGPA</label><br />
+  <input type="number" step="0.1" id="minCGPA" required />
+  <br /><br />
+
+  <label>Allowed Branches (comma separated)</label><br />
+  <input type="text" id="branches" placeholder="CSE,IT,CE" required />
+  <br /><br />
+
+  <label>Graduation Year</label><br />
+  <input type="number" id="gradYear" required />
+  <br /><br />
+
+  <button type="submit">Create Job</button>
+
+</form>
+
+<p id="msg"></p>
+
+<a href="/company/dashboard">Back</a>
+
+<script>
+  const collegeSelect = document.getElementById("collegeId");
+
+  // 🔹 Load registered colleges
+  async function loadColleges() {
+    const res = await fetch("/api/colleges/public");
+    const data = await res.json();
+
+    collegeSelect.innerHTML = `<option value="">Select College</option>`;
+
+    if (data.success) {
+      data.colleges.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c._id;
+        opt.textContent = c.name;
+        collegeSelect.appendChild(opt);
+      });
+    }
+  }
+
+  loadColleges();
+
+  // 🔹 Submit Job Form
+  document.getElementById("jobForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const payload = {
+      collegeId: collegeSelect.value,
+      title: title.value,
+      description: description.value,
+      salary: salary.value,
+      deadline: deadline.value,
+      eligibility: {
+        minCGPA: minCGPA.value,
+        allowedBranches: branches.value.split(",").map(b => b.trim()),
+        graduationYear: gradYear.value
+      }
+    };
+
+    const res = await fetch("/api/companies/job/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    document.getElementById("msg").innerText = data.message;
+
+    if (data.success) {
+      alert("Job Created (Pending College Approval)");
+      window.location.href = "/company/jobs";
+    }
+  });
+</script>
+
+</body>
+</html>
