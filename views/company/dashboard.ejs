@@ -27,6 +27,11 @@
       height: 100vh;
       overflow-y: auto;
       z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar.collapsed {
+      transform: translateX(-260px);
     }
 
     .sidebar-header {
@@ -84,6 +89,11 @@
       margin-left: 260px;
       flex: 1;
       min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    .main-content.expanded {
+      margin-left: 0;
     }
 
     .top-bar {
@@ -203,6 +213,7 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      text-decoration: none;
     }
 
     .btn-primary:hover {
@@ -358,18 +369,26 @@
     }
 
     .menu-toggle {
-      display: none;
       background: none;
       border: none;
       font-size: 24px;
       cursor: pointer;
       color: #333;
+      padding: 8px;
+      border-radius: 6px;
+      transition: background 0.2s ease;
+    }
+
+    .menu-toggle:hover {
+      background: #f0f0f0;
     }
 
     .empty-state {
       text-align: center;
       padding: 60px 20px;
       color: #888;
+      background: white;
+      border-radius: 12px;
     }
 
     .empty-state-icon {
@@ -383,17 +402,35 @@
       margin-bottom: 24px;
     }
 
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 99;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
     @media (max-width: 768px) {
-      .sidebar {
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
+      .sidebar.collapsed {
+        transform: translateX(-260px);
       }
 
-      .sidebar.active {
+      .sidebar:not(.collapsed) {
         transform: translateX(0);
       }
 
       .main-content {
+        margin-left: 0;
+      }
+
+      .main-content.expanded {
         margin-left: 0;
       }
 
@@ -414,6 +451,10 @@
         align-items: flex-start;
         gap: 15px;
       }
+
+      .overlay.active {
+        display: block;
+      }
     }
   </style>
 </head>
@@ -422,37 +463,39 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <h1>Company Portal</h1>
-      <p>Placement Management System</p>
+      <p>Recruitment Management</p>
     </div>
     <nav>
-      <a href="#" class="active" onclick="showSection('overview')">
+      <a href="/company/dashboard" class="active">
         <span>📊</span>
         <span>Overview</span>
       </a>
-      <a href="/company/profile" onclick="showSection('profile')">
+      <a href="/company/profile">
         <span>🏢</span>
         <span>Company Profile</span>
       </a>
-      <a href="#" onclick="showSection('create-job')">
+      <a href="/company/jobs/create">
         <span>➕</span>
         <span>Create Job</span>
       </a>
-      <a href="#" onclick="showSection('jobs')">
+      <a href="/company/jobs">
         <span>💼</span>
         <span>My Job Postings</span>
       </a>
-      <a href="#" onclick="showSection('applications')">
+      <a href="/company/applications">
         <span>📝</span>
         <span>Applications</span>
       </a>
     </nav>
   </aside>
 
-  <main class="main-content">
+  <div class="overlay" id="overlay"></div>
+
+  <main class="main-content" id="mainContent">
     <div class="top-bar">
       <div style="display: flex; align-items: center; gap: 15px;">
-        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-        <h2 id="page-title">Dashboard Overview</h2>
+        <button class="menu-toggle" type="button">☰</button>
+        <h2>Dashboard Overview</h2>
       </div>
       <div class="top-bar-right">
         <button class="logout-btn" onclick="logout()">Logout</button>
@@ -460,288 +503,104 @@
     </div>
 
     <div class="content-area">
-      <!-- Overview Section -->
-      <div id="overview-section">
-        <div class="stats-bar">
-          <div class="stat-card">
-            <div class="stat-card-icon">💼</div>
-            <div class="stat-card-label">Active Job Postings</div>
-            <div class="stat-card-value">8</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card-icon">⏳</div>
-            <div class="stat-card-label">Pending Approvals</div>
-            <div class="stat-card-value">3</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card-icon">📝</div>
-            <div class="stat-card-label">Total Applications</div>
-            <div class="stat-card-value">247</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card-icon">✅</div>
-            <div class="stat-card-label">Shortlisted</div>
-            <div class="stat-card-value">42</div>
-          </div>
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-card-icon">💼</div>
+          <div class="stat-card-label">Active Job Postings</div>
+          <div class="stat-card-value">8</div>
         </div>
-
-        <div class="section-header">
-          <h2 class="section-title">Recent Job Postings</h2>
+        <div class="stat-card">
+          <div class="stat-card-icon">⏳</div>
+          <div class="stat-card-label">Pending Approvals</div>
+          <div class="stat-card-value">3</div>
         </div>
-
-        <div class="cards-grid">
-          <div class="job-card active">
-            <div class="job-card-header">
-              <div>
-                <div class="job-title">Software Engineer</div>
-                <div class="job-details">📍 Bangalore, India</div>
-              </div>
-              <span class="job-status status-active">Active</span>
-            </div>
-            <div class="job-details">💰 CTC: ₹12-15 LPA</div>
-            <div class="job-details">🎓 B.Tech CS, IT</div>
-            <div class="job-meta">
-              <span>📅 Posted: Jan 15, 2026</span>
-              <span>📊 Applications: 45</span>
-            </div>
-            <div class="job-actions">
-              <button class="btn btn-view">View (45)</button>
-              <button class="btn btn-edit">Edit</button>
-              <button class="btn btn-delete">Delete</button>
-            </div>
-          </div>
-
-          <div class="job-card pending">
-            <div class="job-card-header">
-              <div>
-                <div class="job-title">Data Analyst</div>
-                <div class="job-details">📍 Mumbai, India</div>
-              </div>
-              <span class="job-status status-pending">Pending Approval</span>
-            </div>
-            <div class="job-details">💰 CTC: ₹8-10 LPA</div>
-            <div class="job-details">🎓 B.Tech Any, BCA, MCA</div>
-            <div class="job-meta">
-              <span>📅 Posted: Jan 22, 2026</span>
-              <span>📊 Applications: 0</span>
-            </div>
-            <div class="job-actions">
-              <button class="btn btn-view">View (0)</button>
-              <button class="btn btn-edit">Edit</button>
-              <button class="btn btn-delete">Delete</button>
-            </div>
-          </div>
-
-          <div class="job-card active">
-            <div class="job-card-header">
-              <div>
-                <div class="job-title">Full Stack Developer</div>
-                <div class="job-details">📍 Hyderabad, India</div>
-              </div>
-              <span class="job-status status-active">Active</span>
-            </div>
-            <div class="job-details">💰 CTC: ₹10-14 LPA</div>
-            <div class="job-details">🎓 B.Tech CS, IT, ECE</div>
-            <div class="job-meta">
-              <span>📅 Posted: Jan 10, 2026</span>
-              <span>📊 Applications: 67</span>
-            </div>
-            <div class="job-actions">
-              <button class="btn btn-view">View (67)</button>
-              <button class="btn btn-edit">Edit</button>
-              <button class="btn btn-delete">Delete</button>
-            </div>
-          </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">📝</div>
+          <div class="stat-card-label">Total Applications</div>
+          <div class="stat-card-value">247</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">✅</div>
+          <div class="stat-card-label">Shortlisted</div>
+          <div class="stat-card-value">42</div>
         </div>
       </div>
 
-      <!-- Profile Section -->
-      <div id="profile-section" style="display: none;">
-        <h2 class="section-title">Company Profile</h2>
-        <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); max-width: 800px;">
-          <div style="margin-bottom: 20px;">
-            <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Company Name</label>
-            <input type="text" value="Tech Solutions Inc." style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
-          </div>
-          <div style="margin-bottom: 20px;">
-            <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Industry</label>
-            <input type="text" value="Information Technology" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
-          </div>
-          <div style="margin-bottom: 20px;">
-            <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Company Size</label>
-            <select style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
-              <option>1-50 employees</option>
-              <option>51-200 employees</option>
-              <option selected>201-500 employees</option>
-              <option>501-1000 employees</option>
-              <option>1000+ employees</option>
-            </select>
-          </div>
-          <div style="margin-bottom: 20px;">
-            <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">About Company</label>
-            <textarea rows="4" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; resize: vertical;">We are a leading technology company specializing in innovative software solutions...</textarea>
-          </div>
-          <div style="margin-bottom: 20px;">
-            <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Website</label>
-            <input type="url" value="https://techsolutions.com" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
-          </div>
-          <button class="btn-primary">Update Profile</button>
-        </div>
+      <div class="section-header">
+        <h2 class="section-title">Recent Job Postings</h2>
       </div>
 
-      <!-- Create Job Section -->
-      <div id="create-job-section" style="display: none;">
-        <h2 class="section-title">Create New Job Posting</h2>
-        <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); max-width: 800px;">
-          <div style="margin-bottom: 20px;">
-            <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Job Title *</label>
-            <input type="text" placeholder="e.g., Software Engineer" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
-          </div>
-          <div style="margin-bottom: 20px;">
-            <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Select College *</label>
-            <select style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
-              <option value="">-- Select College --</option>
-              <option>IIT Bombay</option>
-              <option>NIT Trichy</option>
-              <option>BITS Pilani</option>
-              <option>VIT Vellore</option>
-            </select>
-          </div>
-          <div style="margin-bottom: 20px;">
-            <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Location *</label>
-            <input type="text" placeholder="e.g., Bangalore" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+      <div class="cards-grid">
+        <div class="job-card active">
+          <div class="job-card-header">
             <div>
-              <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Min CTC (LPA) *</label>
-              <input type="number" placeholder="8" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+              <div class="job-title">Software Engineer</div>
+              <div class="job-details">🏛️ IIT Bombay</div>
+              <div class="job-details">📍 Bangalore, India</div>
             </div>
-            <div>
-              <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Max CTC (LPA) *</label>
-              <input type="number" placeholder="12" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
-            </div>
+            <span class="job-status status-active">Active</span>
           </div>
-          <div style="margin-bottom: 20px;">
-            <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Eligible Departments *</label>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="checkbox"> Computer Science
-              </label>
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="checkbox"> Information Technology
-              </label>
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="checkbox"> Electronics
-              </label>
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="checkbox"> Mechanical
-              </label>
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="checkbox"> Civil
-              </label>
-            </div>
+          <div class="job-details">💰 CTC: ₹12-15 LPA</div>
+          <div class="job-details">🎓 B.Tech CS, IT</div>
+          <div class="job-meta">
+            <span>📅 Posted: Jan 15, 2026</span>
+            <span>⏰ Deadline: Feb 15, 2026</span>
           </div>
-          <div style="margin-bottom: 20px;">
-            <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Job Description *</label>
-            <textarea rows="6" placeholder="Describe the role, responsibilities, and requirements..." style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; resize: vertical;"></textarea>
+          <div class="job-meta">
+            <span>📊 Applications: 45</span>
+            <span>✅ Shortlisted: 8</span>
           </div>
-          <div style="margin-bottom: 20px;">
-            <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Application Deadline *</label>
-            <input type="date" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+          <div class="job-actions">
+            <button class="btn btn-view">View Apps (45)</button>
+            <button class="btn btn-edit">Edit</button>
+            <button class="btn btn-delete">Delete</button>
           </div>
-          <button class="btn-primary">Submit for Approval</button>
         </div>
       </div>
+    </div>
+  </main>
 
-      <!-- Jobs Section -->
-      <div id="jobs-section" style="display: none;">
-        <div class="section-header">
-          <h2 class="section-title">My Job Postings</h2>
-          <button class="btn-primary" onclick="showSection('create-job')">
-            <span>➕</span>
-            Create New Job
-          </button>
-        </div>
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const overlay = document.getElementById('overlay');
+      
+      if (sidebar && mainContent) {
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('expanded');
+        
+        if (window.innerWidth <= 768 && overlay) {
+          overlay.classList.toggle('active');
+        }
+      }
+    }
 
-        <div class="cards-grid">
-          <div class="job-card active">
-            <div class="job-card-header">
-              <div>
-                <div class="job-title">Software Engineer</div>
-                <div class="job-details">🏛️ IIT Bombay</div>
-                <div class="job-details">📍 Bangalore, India</div>
-              </div>
-              <span class="job-status status-active">Active</span>
-            </div>
-            <div class="job-details">💰 CTC: ₹12-15 LPA</div>
-            <div class="job-details">🎓 B.Tech CS, IT</div>
-            <div class="job-meta">
-              <span>📅 Posted: Jan 15, 2026</span>
-              <span>⏰ Deadline: Feb 15, 2026</span>
-            </div>
-            <div class="job-meta">
-              <span>📊 Applications: 45</span>
-              <span>✅ Shortlisted: 8</span>
-            </div>
-            <div class="job-actions">
-              <button class="btn btn-view" onclick="showSection('applications')">View Apps (45)</button>
-              <button class="btn btn-edit">Edit</button>
-              <button class="btn btn-delete">Delete</button>
-            </div>
-          </div>
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuToggle = document.querySelector('.menu-toggle');
+      const overlay = document.getElementById('overlay');
+      
+      if (menuToggle) {
+        menuToggle.addEventListener('click', toggleSidebar);
+      }
+      
+      if (overlay) {
+        overlay.addEventListener('click', function() {
+          if (window.innerWidth <= 768) {
+            toggleSidebar();
+          }
+        });
+      }
+    });
 
-          <div class="job-card pending">
-            <div class="job-card-header">
-              <div>
-                <div class="job-title">Data Analyst</div>
-                <div class="job-details">🏛️ NIT Trichy</div>
-                <div class="job-details">📍 Mumbai, India</div>
-              </div>
-              <span class="job-status status-pending">Pending Approval</span>
-            </div>
-            <div class="job-details">💰 CTC: ₹8-10 LPA</div>
-            <div class="job-details">🎓 B.Tech Any, BCA, MCA</div>
-            <div class="job-meta">
-              <span>📅 Posted: Jan 22, 2026</span>
-              <span>⏰ Deadline: Feb 22, 2026</span>
-            </div>
-            <div class="job-meta">
-              <span>⏳ Awaiting college approval</span>
-            </div>
-            <div class="job-actions">
-              <button class="btn btn-edit">Edit</button>
-              <button class="btn btn-delete">Delete</button>
-            </div>
-          </div>
+    async function logout() {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include"
+      });
+      window.location.href = "/login";
+    }
+  </script>
+</body>
 
-          <div class="job-card active">
-            <div class="job-card-header">
-              <div>
-                <div class="job-title">Full Stack Developer</div>
-                <div class="job-details">🏛️ BITS Pilani</div>
-                <div class="job-details">📍 Hyderabad, India</div>
-              </div>
-              <span class="job-status status-active">Active</span>
-            </div>
-            <div class="job-details">💰 CTC: ₹10-14 LPA</div>
-            <div class="job-details">🎓 B.Tech CS, IT, ECE</div>
-            <div class="job-meta">
-              <span>📅 Posted: Jan 10, 2026</span>
-              <span>⏰ Deadline: Feb 10, 2026</span>
-            </div>
-            <div class="job-meta">
-              <span>📊 Applications: 67</span>
-              <span>✅ Shortlisted: 12</span>
-            </div>
-            <div class="job-actions">
-              <button class="btn btn-view" onclick="showSection('applications')">View Apps (67)</button>
-              <button class="btn btn-edit">Edit</button>
-              <button class="btn btn-delete">Delete</button>
-            </div>
-          </div>
-
-          <div class="job-card closed">
-            <div class="job-card-header">
-              <div>
-                <div class="job-title">DevOps Engineer</div>
-                <div class="job-details">🏛️ VIT Vellore</div
+</html>

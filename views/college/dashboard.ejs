@@ -16,6 +16,7 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       min-height: 100vh;
       display: flex;
+      background: #f5f7fa;
     }
 
     .sidebar {
@@ -26,6 +27,11 @@
       height: 100vh;
       overflow-y: auto;
       z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar.collapsed {
+      transform: translateX(-260px);
     }
 
     .sidebar-header {
@@ -83,6 +89,11 @@
       margin-left: 260px;
       flex: 1;
       min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    .main-content.expanded {
+      margin-left: 0;
     }
 
     .top-bar {
@@ -108,7 +119,6 @@
       align-items: center;
       gap: 20px;
     }
-
 
     .logout-btn {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -298,21 +308,41 @@
     }
 
     .menu-toggle {
-      display: none;
       background: none;
       border: none;
       font-size: 24px;
       cursor: pointer;
       color: #333;
+      padding: 8px;
+      border-radius: 6px;
+      transition: background 0.2s ease;
+    }
+
+    .menu-toggle:hover {
+      background: #f0f0f0;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 99;
+    }
+
+    .overlay.active {
+      display: block;
     }
 
     @media (max-width: 768px) {
       .sidebar {
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
+        transform: translateX(-260px);
       }
 
-      .sidebar.active {
+      .sidebar:not(.collapsed) {
         transform: translateX(0);
       }
 
@@ -320,12 +350,12 @@
         margin-left: 0;
       }
 
-      .menu-toggle {
-        display: block;
-      }
-
       .cards-grid {
         grid-template-columns: 1fr;
+      }
+
+      .overlay.active {
+        display: block;
       }
     }
   </style>
@@ -338,7 +368,7 @@
       <p>Placement Management System</p>
     </div>
     <nav>
-      <a href="#" class="active">
+      <a href="/college/dashboard" class="active">
         <span>📊</span>
         <span>Overview</span>
       </a>
@@ -361,10 +391,12 @@
     </nav>
   </aside>
 
-  <main class="main-content">
+  <div class="overlay" id="overlay"></div>
+
+  <main class="main-content" id="mainContent">
     <div class="top-bar">
       <div style="display: flex; align-items: center; gap: 15px;">
-        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <button class="menu-toggle" type="button">☰</button>
         <h2>Dashboard Overview</h2>
       </div>
       <div class="top-bar-right">
@@ -396,11 +428,11 @@
             <div class="company-icon">G</div>
             <div class="company-name">Google</div>
           </div>
-          <div class="job-details">Role: LPA</div>
-          <div class="job-details">Target Departments</div>
+          <div class="job-details">Role: Software Engineer</div>
+          <div class="job-details">CTC: ₹15-20 LPA</div>
           <div class="job-meta">
-            <span>• CS, IT</span>
-            <span>Deadline: 16:00</span>
+            <span>📚 CS, IT</span>
+            <span>⏰ Deadline: 16:00</span>
           </div>
           <a href="#" class="view-details">🔍 View Details</a>
           <div class="job-actions">
@@ -408,16 +440,47 @@
             <button class="btn btn-reject">Reject</button>
           </div>
         </div>
-
-
       </div>
     </div>
   </main>
 
   <script>
     function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('active');
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const overlay = document.getElementById('overlay');
+      
+      if (sidebar && mainContent) {
+        sidebar.classList.toggle('collapsed');
+        
+        // On desktop, expand main content when sidebar is collapsed
+        if (window.innerWidth > 768) {
+          mainContent.classList.toggle('expanded');
+        } else {
+          // On mobile, show overlay
+          if (overlay) {
+            overlay.classList.toggle('active');
+          }
+        }
+      }
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuToggle = document.querySelector('.menu-toggle');
+      const overlay = document.getElementById('overlay');
+      
+      if (menuToggle) {
+        menuToggle.addEventListener('click', toggleSidebar);
+      }
+      
+      if (overlay) {
+        overlay.addEventListener('click', function() {
+          if (window.innerWidth <= 768) {
+            toggleSidebar();
+          }
+        });
+      }
+    });
 
     async function logout() {
       await fetch("/api/auth/logout", {
