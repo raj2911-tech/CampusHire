@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Details</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: white;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+      transition: transform 0.3s ease;
+      transform: translateX(0);
+    }
+
+    .sidebar.collapsed {
+      transform: translateX(-260px);
+    }
+
+    .sidebar-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 25px 20px;
+      color: white;
+    }
+
+    .sidebar-header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .sidebar-header p {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .sidebar nav {
+      padding: 20px 0;
+    }
+
+    .sidebar nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 15px;
+      font-weight: 500;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar nav a:hover {
+      background: #f8f9fa;
+      border-left-color: #667eea;
+    }
+
+    .sidebar nav a.active {
+      background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+      color: #667eea;
+      border-left-color: #667eea;
+    }
+
+    .sidebar nav a span:first-child {
+      font-size: 18px;
+      width: 24px;
+      text-align: center;
+    }
+
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+      background: #f5f5f5;
+    }
+
+    .main-content.expanded {
+      margin-left: 0;
+    }
+
+    .top-bar {
+      background: white;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .top-bar h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .back-btn {
+      background: #f8f9fa;
+      color: #333;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .back-btn:hover {
+      background: #e9ecef;
+    }
+
+    .content-area {
+      padding: 30px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .job-header {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    .job-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 12px;
+    }
+
+    .job-company {
+      font-size: 18px;
+      color: #667eea;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+
+    .job-meta {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .status-approved {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-rejected {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .detail-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .detail-card.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .info-row {
+      display: flex;
+      padding: 10px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #666;
+      min-width: 140px;
+      font-size: 14px;
+    }
+
+    .info-value {
+      color: #333;
+      font-size: 14px;
+      flex: 1;
+    }
+
+    .description-text {
+      color: #333;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .branches-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .branch-tag {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      color: #667eea;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: white;
+      font-size: 16px;
+    }
+
+    .error {
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      color: #e74c3c;
+      font-size: 16px;
+    }
+
+    .menu-toggle {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #333;
+      padding: 8px;
+      border-radius: 6px;
+      transition: background 0.2s ease;
+    }
+
+    .menu-toggle:hover {
+      background: #f0f0f0;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 99;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar.collapsed {
+        transform: translateX(-260px);
+      }
+
+      .sidebar:not(.collapsed) {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .overlay.active {
+        display: block;
+      }
+
+      .details-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .job-meta {
+        flex-direction: column;
+      }
+
+      .info-row {
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .info-label {
+        min-width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h1>College Dashboard</h1>
+      <p>Placement Management System</p>
+    </div>
+    <nav>
+      <a href="/college/dashboard">
+        <span>📊</span>
+        <span>Overview</span>
+      </a>
+      <a href="/college/profile">
+        <span>🏛️</span>
+        <span>College Profile</span>
+      </a>
+      <a href="/college/students">
+        <span>👥</span>
+        <span>Student Management</span>
+      </a>
+      <a href="/college/jobs" class="active">
+        <span>💼</span>
+        <span>Job Postings</span>
+      </a>
+      <a href="/college/reports">
+        <span>📈</span>
+        <span>Reports</span>
+      </a>
+    </nav>
+  </aside>
+
+  <div class="overlay" id="overlay"></div>
+
+  <main class="main-content" id="mainContent">
+    <div class="top-bar">
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <button class="menu-toggle" type="button">☰</button>
+        <h2>Job Details</h2>
+      </div>
+      <a href="/college/jobs" class="back-btn">← Back to Jobs</a>
+    </div>
+
+    <div class="content-area">
+      <div id="content">
+        <div class="loading">Loading job details...</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const overlay = document.getElementById('overlay');
+      
+      if (sidebar && mainContent) {
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('expanded');
+        
+        if (window.innerWidth <= 768 && overlay) {
+          overlay.classList.toggle('active');
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuToggle = document.querySelector('.menu-toggle');
+      const overlay = document.getElementById('overlay');
+      
+      if (menuToggle) {
+        menuToggle.addEventListener('click', toggleSidebar);
+      }
+      
+      if (overlay) {
+        overlay.addEventListener('click', function() {
+          if (window.innerWidth <= 768) {
+            toggleSidebar();
+          }
+        });
+      }
+    });
+
+    const jobId = "<%= jobId %>";
+    console.log(jobId);
+
+    async function loadJob() {
+      try {
+        const res = await fetch(`/api/colleges/jobs/${jobId}`, {
+          credentials: "include"
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch job");
+        }
+
+        const data = await res.json();
+        const job = data.job;
+
+        displayJob(job);
+      } catch (err) {
+        document.getElementById("content").innerHTML = `
+          <div class="error">
+            <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+            <div>Failed to load job details</div>
+          </div>
+        `;
+      }
+    }
+
+    function displayJob(job) {
+      const contentDiv = document.getElementById("content");
+      
+      const statusClass = job.status === 'APPROVED' ? 'status-approved' : 
+                         job.status === 'REJECTED' ? 'status-rejected' : 'status-pending';
+      
+      const branchesHTML = job.eligibility.allowedBranches.map(branch => 
+        `<span class="branch-tag">${branch}</span>`
+      ).join('');
+
+      const salary = new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0
+      }).format(job.salary);
+
+      const deadline = new Date(job.deadline).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
+      const createdAt = new Date(job.createdAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
+      const updatedAt = new Date(job.updatedAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      contentDiv.innerHTML = `
+        <div class="job-header">
+          <div class="job-title">${job.title}</div>
+          <div class="job-company">🏢 ${job.companyId.name || 'Company Name'}</div>
+          <div class="job-meta">
+            <div class="meta-item">
+              <span class="status-badge ${statusClass}">${job.status}</span>
+            </div>
+            <div class="meta-item">💰 ${salary}</div>
+            <div class="meta-item">📅 Deadline: ${deadline}</div>
+          </div>
+        </div>
+
+        <div class="details-grid">
+          <div class="detail-card full-width">
+            <div class="card-header">
+              <div class="card-icon">📝</div>
+              <div class="card-title">Job Description</div>
+            </div>
+            <div class="description-text">${job.description}</div>
+          </div>
+
+          <div class="detail-card">
+            <div class="card-header">
+              <div class="card-icon">🎓</div>
+              <div class="card-title">Eligibility Criteria</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Minimum CGPA:</div>
+              <div class="info-value">${job.eligibility.minCGPA}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Graduation Year:</div>
+              <div class="info-value">${job.eligibility.graduationYear}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Allowed Branches:</div>
+              <div class="info-value">
+                <div class="branches-list">${branchesHTML}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <div class="card-header">
+              <div class="card-icon">ℹ️</div>
+              <div class="card-title">Additional Information</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Job ID:</div>
+              <div class="info-value">${job._id}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Posted On:</div>
+              <div class="info-value">${createdAt}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Last Updated:</div>
+              <div class="info-value">${updatedAt}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    loadJob();
+  </script>
+</body>
+</html>

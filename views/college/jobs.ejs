@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Approved & Rejected Jobs</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: white;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+      transition: transform 0.3s ease;
+      transform: translateX(0);
+    }
+
+    .sidebar.collapsed {
+      transform: translateX(-260px);
+    }
+
+    .sidebar-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 25px 20px;
+      color: white;
+    }
+
+    .sidebar-header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .sidebar-header p {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .sidebar nav {
+      padding: 20px 0;
+    }
+
+    .sidebar nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 15px;
+      font-weight: 500;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar nav a:hover {
+      background: #f8f9fa;
+      border-left-color: #667eea;
+    }
+
+    .sidebar nav a.active {
+      background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+      color: #667eea;
+      border-left-color: #667eea;
+    }
+
+    .sidebar nav a span:first-child {
+      font-size: 18px;
+      width: 24px;
+      text-align: center;
+    }
+
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    .main-content.expanded {
+      margin-left: 0;
+    }
+
+    .top-bar {
+      background: white;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .top-bar h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .back-btn {
+      background: #f8f9fa;
+      color: #333;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .back-btn:hover {
+      background: #e9ecef;
+    }
+
+    .content-area {
+      padding: 30px;
+    }
+
+    .filter-bar {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 8px 16px;
+      border: 2px solid #e0e0e0;
+      background: white;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: #666;
+    }
+
+    .filter-btn:hover {
+      border-color: #667eea;
+      color: #667eea;
+    }
+
+    .filter-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: transparent;
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    thead th {
+      padding: 16px 20px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.2s ease;
+    }
+
+    tbody tr:hover {
+      background: #f8f9fa;
+    }
+
+    tbody td {
+      padding: 16px 20px;
+      color: #333;
+      font-size: 15px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .status-approved {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-rejected {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .view-link {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .view-link:hover {
+      color: #764ba2;
+      text-decoration: underline;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: #667eea;
+      font-size: 16px;
+    }
+
+    .menu-toggle {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #333;
+      padding: 8px;
+      border-radius: 6px;
+      transition: background 0.2s ease;
+    }
+
+    .menu-toggle:hover {
+      background: #f0f0f0;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 99;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar.collapsed {
+        transform: translateX(-260px);
+      }
+
+      .sidebar:not(.collapsed) {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .overlay.active {
+        display: block;
+      }
+
+      .table-container {
+        overflow-x: auto;
+      }
+
+      table {
+        min-width: 700px;
+      }
+
+      .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h1>College Dashboard</h1>
+      <p>Placement Management System</p>
+    </div>
+    <nav>
+      <a href="/college/dashboard">
+        <span>📊</span>
+        <span>Overview</span>
+      </a>
+      <a href="/college/profile">
+        <span>🏛️</span>
+        <span>College Profile</span>
+      </a>
+      <a href="/college/students">
+        <span>👥</span>
+        <span>Student Management</span>
+      </a>
+      <a href="/college/jobs" class="active">
+        <span>💼</span>
+        <span>Job Postings</span>
+      </a>
+      <a href="/college/reports">
+        <span>📈</span>
+        <span>Reports</span>
+      </a>
+    </nav>
+  </aside>
+
+  <div class="overlay" id="overlay"></div>
+
+  <main class="main-content" id="mainContent">
+    <div class="top-bar">
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <button class="menu-toggle" type="button">☰</button>
+        <h2>Job Postings</h2>
+      </div>
+      <div class="top-bar-right">
+        <a href="/college/dashboard" class="back-btn">← Back to Dashboard</a>
+      </div>
+    </div>
+
+    <div class="content-area">
+      <div class="filter-bar">
+        <span style="font-weight: 600; color: #333;">Filter by Status:</span>
+        <button class="filter-btn active" onclick="filterJobs('ALL')">All</button>
+        <button class="filter-btn" onclick="filterJobs('APPROVED')">Approved</button>
+        <button class="filter-btn" onclick="filterJobs('REJECTED')">Rejected</button>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Job Title</th>
+              <th>Status</th>
+              <th>Salary</th>
+              <th>Deadline</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="jobsTable">
+            <tr>
+              <td colspan="6" class="loading">Loading jobs...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let allJobs = [];
+    let currentFilter = 'ALL';
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const overlay = document.getElementById('overlay');
+      
+      if (sidebar && mainContent) {
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('expanded');
+        
+        if (window.innerWidth <= 768 && overlay) {
+          overlay.classList.toggle('active');
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuToggle = document.querySelector('.menu-toggle');
+      const overlay = document.getElementById('overlay');
+      
+      if (menuToggle) {
+        menuToggle.addEventListener('click', toggleSidebar);
+      }
+      
+      if (overlay) {
+        overlay.addEventListener('click', function() {
+          if (window.innerWidth <= 768) {
+            toggleSidebar();
+          }
+        });
+      }
+    });
+
+    async function loadJobs() {
+      try {
+        const res = await fetch("/api/colleges/jobs", {
+          credentials: "include"
+        });
+        const data = await res.json();
+
+        allJobs = data.jobs.filter(job =>
+          job.status === "APPROVED" || job.status === "REJECTED"
+        );
+
+        renderJobs(allJobs);
+      } catch (error) {
+        const table = document.getElementById("jobsTable");
+        table.innerHTML = `
+          <tr>
+            <td colspan="6" class="empty-state">
+              <div>⚠️</div>
+              <div>Failed to load jobs</div>
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    function renderJobs(jobs) {
+      const table = document.getElementById("jobsTable");
+      
+      if (jobs.length === 0) {
+        table.innerHTML = `
+          <tr>
+            <td colspan="6" class="empty-state">
+              <div>💼</div>
+              <div>No jobs found</div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      table.innerHTML = "";
+
+      jobs.forEach(job => {
+        const tr = document.createElement("tr");
+
+        const companyTd = document.createElement("td");
+        companyTd.textContent = job.companyId.name;
+
+        const titleTd = document.createElement("td");
+        titleTd.textContent = job.title;
+
+        const statusTd = document.createElement("td");
+        const statusBadge = document.createElement("span");
+        statusBadge.className = `status-badge ${job.status === 'APPROVED' ? 'status-approved' : 'status-rejected'}`;
+        statusBadge.textContent = job.status;
+        statusTd.appendChild(statusBadge);
+
+        const salaryTd = document.createElement("td");
+        salaryTd.textContent = job.salary;
+
+        const deadlineTd = document.createElement("td");
+        deadlineTd.textContent = new Date(job.deadline).toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric' 
+        });
+
+        const actionTd = document.createElement("td");
+        const viewLink = document.createElement("a");
+        viewLink.href = `/college/jobs/${job._id}`;
+        viewLink.className = "view-link";
+        viewLink.textContent = "View Details →";
+        actionTd.appendChild(viewLink);
+
+        tr.appendChild(companyTd);
+        tr.appendChild(titleTd);
+        tr.appendChild(statusTd);
+        tr.appendChild(salaryTd);
+        tr.appendChild(deadlineTd);
+        tr.appendChild(actionTd);
+
+        table.appendChild(tr);
+      });
+    }
+
+    function filterJobs(status) {
+      currentFilter = status;
+      
+      // Update active button
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      // Filter jobs
+      let filtered = allJobs;
+      if (status !== 'ALL') {
+        filtered = allJobs.filter(job => job.status === status);
+      }
+
+      renderJobs(filtered);
+    }
+
+    loadJobs();
+  </script>
+</body>
+</html>

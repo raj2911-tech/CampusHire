@@ -220,6 +220,43 @@ export const getJobs = async (req, res) => {
   }
 };
 
+export const getJob = async (req, res) => {
+  const userId = req.user.id;
+  const { jobId } = req.params;
+
+  try {
+    const college = await collegeModel.findOne({ userId });
+    if (!college) {
+      return res.status(404).json({
+        success: false,
+        message: "College not found"
+      });
+    }
+
+    const job = await jobModel
+      .findOne({ _id: jobId, collegeId: college._id }) // 👈 ensure ownership
+      .populate("companyId", "name");
+
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: "Job not found"
+      });
+    }
+
+    return res.json({
+      success: true,
+      job
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
 export const jobAction = async (req, res) => {
   const { id, status } = req.params;
   let job;

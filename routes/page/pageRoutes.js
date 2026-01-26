@@ -34,6 +34,14 @@ router.get("/college/profile/edit", protect, (req, res) => {
 router.get("/college/student/:id", protect, (req, res) => {
   res.render("college/studentDetails");
 });
+
+router.get("/college/jobs", protect, (req, res) => {
+  res.render("college/jobs");
+});
+
+router.get("/college/jobs/:jobId", protect, (req, res) => {
+  res.render("college/jobDetails",{ jobId: req.params.jobId });
+});
 // <<<------------------------------------Company Routes------------------------------------------------>>>
 
 router.get("/company/dashboard", protect, (req, res) => {
