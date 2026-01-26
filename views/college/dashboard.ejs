@@ -260,6 +260,7 @@
       margin-bottom: 16px;
       font-weight: 500;
       transition: color 0.3s ease;
+      cursor: pointer;
     }
 
     .view-details:hover {
@@ -283,13 +284,18 @@
       transition: all 0.3s ease;
     }
 
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     .btn-approve {
       background: #27ae60;
       color: white;
       box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
     }
 
-    .btn-approve:hover {
+    .btn-approve:hover:not(:disabled) {
       background: #229954;
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
@@ -301,7 +307,7 @@
       box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
     }
 
-    .btn-reject:hover {
+    .btn-reject:hover:not(:disabled) {
       background: #c0392b;
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
@@ -335,6 +341,159 @@
 
     .overlay.active {
       display: block;
+    }
+
+    .message {
+      text-align: center;
+      padding: 40px;
+      color: #888;
+      font-size: 15px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 0;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.3s ease;
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 24px;
+      border-radius: 16px 16px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      font-size: 24px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .detail-row {
+      margin-bottom: 18px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .detail-label {
+      font-size: 12px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .detail-value {
+      font-size: 15px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .detail-value.large {
+      font-size: 18px;
+      color: #667eea;
+      font-weight: 600;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+
+    .badge-primary {
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
+    }
+
+    .badge-success {
+      background: rgba(39, 174, 96, 0.1);
+      color: #27ae60;
+    }
+
+    .badge-warning {
+      background: rgba(243, 156, 18, 0.1);
+      color: #f39c12;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
 
     @media (max-width: 768px) {
@@ -410,7 +569,7 @@
           Total Students: <strong>1,200</strong>
         </div>
         <div class="stat-card highlighted">
-          Pending Job Approvals
+          Pending Job Approvals: <strong id="pendingCount">0</strong>
         </div>
         <div class="stat-card">
           Active Job Postings: <strong>12</strong>
@@ -422,29 +581,36 @@
 
       <h2 class="section-title">Job Approval Queue</h2>
 
-      <div class="cards-grid">
-        <div class="job-card">
-          <div class="job-card-header">
-            <div class="company-icon">G</div>
-            <div class="company-name">Google</div>
-          </div>
-          <div class="job-details">Role: Software Engineer</div>
-          <div class="job-details">CTC: ₹15-20 LPA</div>
-          <div class="job-meta">
-            <span>📚 CS, IT</span>
-            <span>⏰ Deadline: 16:00</span>
-          </div>
-          <a href="#" class="view-details">🔍 View Details</a>
-          <div class="job-actions">
-            <button class="btn btn-approve">Approve</button>
-            <button class="btn btn-reject">Reject</button>
-          </div>
-        </div>
+      <div id="loadingMessage" class="message">
+        Loading jobs...
+      </div>
+
+      <div id="emptyMessage" class="message" style="display: none;">
+        No pending job approvals at the moment.
+      </div>
+
+      <div class="cards-grid" id="jobsContainer">
+        <!-- Jobs will be dynamically loaded here -->
       </div>
     </div>
   </main>
 
+  <!-- Job Details Modal -->
+  <div class="modal" id="jobModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Job Details</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Job details will be dynamically loaded here -->
+      </div>
+    </div>
+  </div>
+
   <script>
+    let jobsData = [];
+
     function toggleSidebar() {
       const sidebar = document.getElementById('sidebar');
       const mainContent = document.getElementById('mainContent');
@@ -453,16 +619,213 @@
       if (sidebar && mainContent) {
         sidebar.classList.toggle('collapsed');
         
-        // On desktop, expand main content when sidebar is collapsed
         if (window.innerWidth > 768) {
           mainContent.classList.toggle('expanded');
         } else {
-          // On mobile, show overlay
           if (overlay) {
             overlay.classList.toggle('active');
           }
         }
       }
+    }
+
+    function formatCurrency(amount) {
+      if (amount >= 10000000) {
+        return `₹${(amount / 10000000).toFixed(1)} Cr`;
+      } else if (amount >= 100000) {
+        return `₹${(amount / 100000).toFixed(1)} LPA`;
+      }
+      return `₹${amount.toLocaleString('en-IN')}`;
+    }
+
+    function formatDeadline(dateString) {
+      const date = new Date(dateString);
+      const options = { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+      return date.toLocaleDateString('en-US', options);
+    }
+
+    function getCompanyInitial(title) {
+      return title.charAt(0).toUpperCase();
+    }
+
+    function renderJobs() {
+      const container = document.getElementById('jobsContainer');
+      const loadingMessage = document.getElementById('loadingMessage');
+      const emptyMessage = document.getElementById('emptyMessage');
+      
+      loadingMessage.style.display = 'none';
+      
+      if (!jobsData || jobsData.length === 0) {
+        emptyMessage.style.display = 'block';
+        container.innerHTML = '';
+        return;
+      }
+
+      emptyMessage.style.display = 'none';
+      
+      container.innerHTML = jobsData.map(job => `
+        <div class="job-card" id="job-${job._id}">
+          <div class="job-card-header">
+            <div class="company-icon">${getCompanyInitial(job.title)}</div>
+            <div class="company-name">${job.companyId.name}</div>
+          </div>
+          <div class="job-details">Job Title: ${job.title}</div>
+          <div class="job-details">CTC: ${formatCurrency(job.salary)}</div>
+          <div class="job-meta">
+            <span>⏰ ${formatDeadline(job.deadline)}</span>
+          </div>
+          <a class="view-details" onclick="viewJobDetails('${job._id}')">🔍 View Details</a>
+          <div class="job-actions">
+            <button class="btn btn-approve" onclick="handleJobAction('${job._id}', 'approve')">Approve</button>
+            <button class="btn btn-reject" onclick="handleJobAction('${job._id}', 'reject')">Reject</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function fetchJobs() {
+      try {
+        const response = await fetch('/api/colleges/jobs', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch jobs');
+        }
+
+        const data = await response.json();
+        
+        if (data.success) {
+          jobsData = data.jobs.filter(job => job.status === 'PENDING');
+          renderJobs();
+          updatePendingCount();
+        }
+      } catch (error) {
+        console.error('Error fetching jobs:', error);
+        document.getElementById('loadingMessage').textContent = 'Error loading jobs. Please try again.';
+      }
+    }
+
+    async function handleJobAction(jobId, action) {
+      const jobCard = document.getElementById(`job-${jobId}`);
+      
+      if (!jobCard) return;
+
+      const buttons = jobCard.querySelectorAll('.btn');
+      buttons.forEach(btn => btn.disabled = true);
+
+      try {
+        const endpoint = action === 'approve' 
+          ? `/api/colleges/jobs/${jobId}/approve` 
+          : `/api/colleges/jobs/${jobId}/reject`;
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to ${action} job`);
+        }
+
+        const result = await response.json();
+        
+        if (result.success) {
+          // Remove job from local data
+          jobsData = jobsData.filter(job => job._id !== jobId);
+          
+          // Animate card removal
+          jobCard.style.transition = 'all 0.3s ease';
+          jobCard.style.opacity = '0';
+          jobCard.style.transform = 'scale(0.9)';
+          
+          setTimeout(() => {
+            renderJobs();
+            updatePendingCount();
+          }, 300);
+        }
+      } catch (error) {
+        console.error(`Error ${action}ing job:`, error);
+        alert(`Failed to ${action} job. Please try again.`);
+        buttons.forEach(btn => btn.disabled = false);
+      }
+    }
+
+    function updatePendingCount() {
+      const pendingCountEl = document.getElementById('pendingCount');
+      if (pendingCountEl) {
+        pendingCountEl.textContent = jobsData.length;
+      }
+    }
+
+    function viewJobDetails(jobId) {
+      const job = jobsData.find(j => j._id === jobId);
+      if (!job) return;
+
+      const modalBody = document.getElementById('modalBody');
+      const modal = document.getElementById('jobModal');
+      
+      modalBody.innerHTML = `
+        <div class="detail-row">
+          <div class="detail-label">Job Title</div>
+          <div class="detail-value large">${job.title}</div>
+        </div>
+        
+        <div class="detail-row">
+          <div class="detail-label">Description</div>
+          <div class="detail-value">${job.description}</div>
+        </div>
+        
+        <div class="detail-row">
+          <div class="detail-label">Salary Package</div>
+          <div class="detail-value large">${formatCurrency(job.salary)}</div>
+        </div>
+        
+        <div class="detail-row">
+          <div class="detail-label">Eligible Branches</div>
+          <div class="detail-value">
+            ${job.eligibility.allowedBranches.map(branch => 
+              `<span class="badge badge-primary">${branch}</span>`
+            ).join('')}
+          </div>
+        </div>
+        
+        <div class="detail-row">
+          <div class="detail-label">Minimum CGPA</div>
+          <div class="detail-value">${job.eligibility.minCGPA}</div>
+        </div>
+        
+        <div class="detail-row">
+          <div class="detail-label">Graduation Year</div>
+          <div class="detail-value">${job.eligibility.graduationYear}</div>
+        </div>
+        
+        <div class="detail-row">
+          <div class="detail-label">Application Deadline</div>
+          <div class="detail-value">${formatDeadline(job.deadline)}</div>
+        </div>
+        
+        <div class="detail-row">
+          <div class="detail-label">Status</div>
+          <div class="detail-value">
+            <span class="badge badge-warning">${job.status}</span>
+          </div>
+        </div>
+      `;
+      
+      modal.classList.add('active');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('jobModal');
+      modal.classList.remove('active');
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -480,14 +843,32 @@
           }
         });
       }
+
+      // Close modal when clicking outside
+      const modal = document.getElementById('jobModal');
+      if (modal) {
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal) {
+            closeModal();
+          }
+        });
+      }
+
+      // Fetch jobs on page load
+      fetchJobs();
     });
 
     async function logout() {
-      await fetch("/api/auth/logout", {
-        method: "POST",
-        credentials: "include"
-      });
-      window.location.href = "/login";
+      try {
+        await fetch("/api/auth/logout", {
+          method: "POST",
+          credentials: "include"
+        });
+        window.location.href = "/login";
+      } catch (error) {
+        console.error('Logout error:', error);
+        window.location.href = "/login";
+      }
     }
   </script>
 </body>

@@ -1,9 +1,11 @@
 import collegeModel from "../../models/colleges.js";
 import studentModel from "../../models/students.js";
+import jobModel from "../../models/jobs.js";
+import companyModel from "../../models/companies.js"
 
 export const getProfile = async (req, res) => {
-  const  id  = req.user.id;
-  const email= req.user.email;
+  const id = req.user.id;
+  const email = req.user.email;
 
   try {
     const profile = await collegeModel.findOne({ userId: id });
@@ -30,68 +32,68 @@ export const getProfile = async (req, res) => {
 };
 
 export const updateProfile = async (req, res) => {
-    const  id  = req.user.id;
-    const { name, placementOfficer } = req.body;
+  const id = req.user.id;
+  const { name, placementOfficer } = req.body;
 
- 
-  
-    try {
-      if (!name || !placementOfficer) {
-        return res.status(400).json({
-          success: false,
-          message: "Missing college details"
-        });
-      }
-  
-      const result = await collegeModel.updateOne(
-        { userId: id },                 // filter
-        { $set: { name, placementOfficer } } // update
-      );
-  
-      if (result.matchedCount === 0) {
-        return res.status(404).json({
-          success: false,
-          message: "College not found"
-        });
-      }
-  
-      return res.json({
-        success: true,
-        message: "Profile updated successfully"
-      });
-  
-    } catch (error) {
-      return res.status(500).json({
+
+
+  try {
+    if (!name || !placementOfficer) {
+      return res.status(400).json({
         success: false,
-        message: error.message
+        message: "Missing college details"
       });
     }
-  };
+
+    const result = await collegeModel.updateOne(
+      { userId: id },                 // filter
+      { $set: { name, placementOfficer } } // update
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "College not found"
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "Profile updated successfully"
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
 
 export const viewStudents = async (req, res) => {
-    const userId = req.user.id;
-    
-    try {
-      const college= await collegeModel.findOne({userId});
-      
-      if(!college){
-        return res.status(404).json({
-          success: false,
-          message: "College not found"
-        });
-      }
-      const collegeId=college._id.toString();
-      const students = await studentModel.find({ collegeId },{enrollment_no:1, name:2, blacklistedBy:3});
+  const userId = req.user.id;
 
-        res.json({
-            success: true,
-            count: students.length,
-            students
-        });
+  try {
+    const college = await collegeModel.findOne({ userId });
+
+    if (!college) {
+      return res.status(404).json({
+        success: false,
+        message: "College not found"
+      });
     }
-    catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
+    const collegeId = college._id.toString();
+    const students = await studentModel.find({ collegeId }, { enrollment_no: 1, name: 2, blacklistedBy: 3 });
+
+    res.json({
+      success: true,
+      count: students.length,
+      students
+    });
+  }
+  catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 export const blackList = async (req, res) => {
@@ -109,7 +111,7 @@ export const blackList = async (req, res) => {
 
     const student = await studentModel.findByIdAndUpdate(
       id,
-      { $addToSet: { blacklistedBy: college._id } }, 
+      { $addToSet: { blacklistedBy: college._id } },
       { new: true }
     );
 
@@ -122,7 +124,7 @@ export const blackList = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      blacklistedBy: student.blacklistedBy 
+      blacklistedBy: student.blacklistedBy
     });
 
   } catch (error) {
@@ -148,7 +150,7 @@ export const unBlackList = async (req, res) => {
 
     const student = await studentModel.findByIdAndUpdate(
       id,
-      { $pull: { blacklistedBy: college._id } }, 
+      { $pull: { blacklistedBy: college._id } },
       { new: true }
     );
 
@@ -172,11 +174,11 @@ export const unBlackList = async (req, res) => {
   }
 };
 
-export const getStudent = async (req,res) =>{
-  const {id}= req.params;
+export const getStudent = async (req, res) => {
+  const { id } = req.params;
   try {
-    const student= await studentModel.findById(id);
-    if(!student){
+    const student = await studentModel.findById(id);
+    if (!student) {
       return res.status(404).json({
         success: false,
         message: "Student not found"
@@ -192,4 +194,68 @@ export const getStudent = async (req,res) =>{
       message: error.message
     });
   }
+};
+
+export const getJobs = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const college = await collegeModel.findOne({ userId });
+    if (!college) {
+      return res.status(404).json({ success: false, message: "College not found" });
+    }
+
+    const jobs = await jobModel
+      .find({ collegeId: college._id })
+      .populate("companyId", "name");
+
+    return res.json({
+      success: true,
+      count: jobs.length,
+      jobs
+    });
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const jobAction = async (req, res) => {
+  const { id, status } = req.params;
+  let job;
+  try {
+    if (status === "approve") {
+      job = await jobModel.findByIdAndUpdate(
+        id,
+        { status: "APPROVED"},
+        { new: true }
+      );
+
+    }
+    else if (status === "reject") {
+      job = await jobModel.findByIdAndUpdate(
+        id,
+        {status: "REJECTED"},
+        { new: true }
+      );
+    }
+
+
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: "Job not found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+
 };

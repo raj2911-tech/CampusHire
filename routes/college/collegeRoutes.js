@@ -1,6 +1,6 @@
 import express from "express";
 import { getRegisteredColleges } from "../../services/getCollegeNames.js";
-import {blackList, getProfile, getStudent, unBlackList, updateProfile, viewStudents} from "../../controllers/college/collegeController.js"
+import {blackList, getJobs, getProfile, getStudent, jobAction, unBlackList, updateProfile, viewStudents} from "../../controllers/college/collegeController.js"
 import {protect} from "../../middlewares/auth/authMiddleware.js";
 
 const router = express.Router();
@@ -13,6 +13,10 @@ router.get("/students", protect, viewStudents);
 router.post("/blacklist/:id",protect,blackList);
 router.post("/unblacklist/:id",protect,unBlackList);
 router.get("/student/:id", protect, getStudent);
+router.get("/jobs", protect, getJobs);
+router.post("/jobs/:id/:status", protect, jobAction);
+
+
 
 
 
