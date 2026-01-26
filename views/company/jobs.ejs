@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Job Postings</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      background: #f5f7fa;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: white;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar.collapsed {
+      transform: translateX(-260px);
+    }
+
+    .sidebar-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 25px 20px;
+      color: white;
+    }
+
+    .sidebar-header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .sidebar-header p {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .sidebar nav {
+      padding: 20px 0;
+    }
+
+    .sidebar nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 15px;
+      font-weight: 500;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar nav a:hover {
+      background: #f8f9fa;
+      border-left-color: #667eea;
+    }
+
+    .sidebar nav a.active {
+      background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+      color: #667eea;
+      border-left-color: #667eea;
+    }
+
+    .sidebar nav a span:first-child {
+      font-size: 18px;
+      width: 24px;
+      text-align: center;
+    }
+
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    .main-content.expanded {
+      margin-left: 0;
+    }
+
+    .top-bar {
+      background: white;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .top-bar h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .content-area {
+      padding: 30px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: #667eea;
+      font-size: 16px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-state-text {
+      font-size: 18px;
+      color: #666;
+      margin-bottom: 24px;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+    }
+
+    .job-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      border-left: 4px solid transparent;
+    }
+
+    .job-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .job-card.approved {
+      border-left-color: #27ae60;
+      background: linear-gradient(to right, rgba(39, 174, 96, 0.05), white);
+    }
+
+    .job-card.pending {
+      border-left-color: #f39c12;
+      background: linear-gradient(to right, rgba(243, 156, 18, 0.05), white);
+    }
+
+    .job-card.rejected {
+      border-left-color: #e74c3c;
+      background: linear-gradient(to right, rgba(231, 76, 60, 0.05), white);
+    }
+
+    .job-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 16px;
+    }
+
+    .job-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .job-status {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-approved {
+      background: #d4edda;
+      color: #27ae60;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #f39c12;
+    }
+
+    .status-rejected {
+      background: #f8d7da;
+      color: #e74c3c;
+    }
+
+    .job-details {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+
+    .job-details strong {
+      color: #333;
+      font-weight: 600;
+    }
+
+    .job-meta {
+      display: flex;
+      gap: 15px;
+      margin: 12px 0;
+      font-size: 12px;
+      color: #888;
+      flex-wrap: wrap;
+    }
+
+    .job-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .job-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .btn-view {
+      background: #3498db;
+      color: white;
+      box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-view:hover {
+      background: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+    }
+
+    .btn-edit {
+      background: #f39c12;
+      color: white;
+      box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
+    }
+
+    .btn-edit:hover {
+      background: #e67e22;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
+    }
+
+    .btn-delete {
+      background: #e74c3c;
+      color: white;
+      box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+    }
+
+    .btn-delete:hover {
+      background: #c0392b;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+    }
+
+    .menu-toggle {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #333;
+      padding: 8px;
+      border-radius: 6px;
+      transition: background 0.2s ease;
+    }
+
+    .menu-toggle:hover {
+      background: #f0f0f0;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 99;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-260px);
+      }
+
+      .sidebar:not(.collapsed) {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .overlay.active {
+        display: block;
+      }
+
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .job-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h1>Company Portal</h1>
+      <p>Recruitment Management</p>
+    </div>
+    <nav>
+      <a href="/company/dashboard">
+        <span>📊</span>
+        <span>Overview</span>
+      </a>
+      <a href="/company/profile">
+        <span>🏢</span>
+        <span>Company Profile</span>
+      </a>
+      <a href="/company/jobs/create">
+        <span>➕</span>
+        <span>Create Job</span>
+      </a>
+      <a href="/company/jobs" class="active">
+        <span>💼</span>
+        <span>My Job Postings</span>
+      </a>
+      <a href="/company/applications">
+        <span>📝</span>
+        <span>Applications</span>
+      </a>
+    </nav>
+  </aside>
+
+  <div class="overlay" id="overlay"></div>
+
+  <main class="main-content" id="mainContent">
+    <div class="top-bar">
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <button class="menu-toggle" type="button">☰</button>
+        <h2>My Job Postings</h2>
+      </div>
+      <div class="top-bar-right">
+        <a href="/company/jobs/create" class="btn-primary">
+          <span>➕</span>
+          Create New Job
+        </a>
+      </div>
+    </div>
+
+    <div class="content-area">
+      <div id="jobsContainer">
+        <div class="loading">Loading job postings...</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const overlay = document.getElementById('overlay');
+      
+      if (sidebar && mainContent) {
+        sidebar.classList.toggle('collapsed');
+        
+        if (window.innerWidth > 768) {
+          mainContent.classList.toggle('expanded');
+        } else {
+          if (overlay) {
+            overlay.classList.toggle('active');
+          }
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuToggle = document.querySelector('.menu-toggle');
+      const overlay = document.getElementById('overlay');
+      
+      if (menuToggle) {
+        menuToggle.addEventListener('click', toggleSidebar);
+      }
+      
+      if (overlay) {
+        overlay.addEventListener('click', function() {
+          if (window.innerWidth <= 768) {
+            toggleSidebar();
+          }
+        });
+      }
+    });
+
+    async function loadJobs() {
+      const container = document.getElementById("jobsContainer");
+      
+      try {
+        const res = await fetch("/api/companies/jobs", {
+          credentials: "include"
+        });
+        const data = await res.json();
+
+        if (!data.success || !data.jobs || data.jobs.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">💼</div>
+              <div class="empty-state-text">No job postings yet</div>
+              <a href="/company/jobs/create" class="btn-primary">
+                <span>➕</span>
+                Create Your First Job
+              </a>
+            </div>
+          `;
+          return;
+        }
+
+        const grid = document.createElement("div");
+        grid.className = "cards-grid";
+
+        data.jobs.forEach(job => {
+          const statusClass = job.status.toLowerCase();
+          const statusDisplay = job.status.toUpperCase();
+          
+          const card = document.createElement("div");
+          card.className = `job-card ${statusClass}`;
+
+          const deadlineDate = new Date(job.deadline);
+          const formattedDeadline = deadlineDate.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+
+          let actionButtons = `
+            <a href="/company/jobs/${job._id}" class="btn btn-view">View Details</a>
+          `;
+
+          if (job.status === "PENDING") {
+            actionButtons = `
+              <a href="/company/jobs/${job._id}" class="btn btn-view">View Details</a>
+              <button class="btn btn-edit" onclick="editJob('${job._id}')">Edit</button>
+              <button class="btn btn-delete" onclick="deleteJob('${job._id}')">Delete</button>
+            `;
+          }
+
+          card.innerHTML = `
+            <div class="job-card-header">
+              <div>
+                <div class="job-title">${job.title}</div>
+              </div>
+              <span class="job-status status-${statusClass}">${statusDisplay}</span>
+            </div>
+            <div class="job-details">
+              <strong>Description:</strong> ${job.description.length > 100 ? job.description.substring(0, 100) + '...' : job.description}
+            </div>
+            <div class="job-details">
+              <strong>Salary:</strong> ₹${job.salary} LPA
+            </div>
+            <div class="job-meta">
+              <span>📅 Deadline: ${formattedDeadline}</span>
+              <span>🎓 Min CGPA: ${job.eligibility?.minCGPA || 'N/A'}</span>
+            </div>
+            <div class="job-actions">
+              ${actionButtons}
+            </div>
+          `;
+
+          grid.appendChild(card);
+        });
+
+        container.innerHTML = "";
+        container.appendChild(grid);
+
+      } catch (error) {
+        console.error('Error loading jobs:', error);
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">⚠️</div>
+            <div class="empty-state-text">Error loading job postings. Please try again.</div>
+          </div>
+        `;
+      }
+    }
+
+    async function deleteJob(id) {
+      if (!confirm("Are you sure you want to delete this job posting? This action cannot be undone.")) {
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/companies/jobs/${id}/delete`, {
+          method: "POST",
+          credentials: "include"
+        });
+
+        const data = await res.json();
+
+        if (data.success || res.ok) {
+          alert("Job posting deleted successfully");
+          loadJobs();
+        } else {
+          alert(data.message || "Failed to delete job posting");
+        }
+      } catch (error) {
+        console.error('Error deleting job:', error);
+        alert("An error occurred while deleting the job");
+      }
+    }
+
+    function editJob(id) {
+      window.location.href = `/company/jobs/${id}/edit`;
+    }
+
+    loadJobs();
+  </script>
+</body>
+</html>

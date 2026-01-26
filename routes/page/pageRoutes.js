@@ -64,7 +64,13 @@ router.get("/company/jobs", protect, (req, res) => {
   res.render("company/jobs");
 });
 
+router.get("/company/jobs/:id/edit", protect, (req, res) => {
+  res.render("company/editJob",{ jobId: req.params.id });
+});
 
 
+router.get("/company/jobs/:id", protect, (req, res) => {
+  res.render("company/jobDetails",{ jobId: req.params.id });
+});
 
 export default router;
