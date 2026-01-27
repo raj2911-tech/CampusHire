@@ -5,6 +5,8 @@ import authRouter from "../routes/auth/authRoutes.js";
 import pageRoutes from "../routes/page/pageRoutes.js";
 import collegeRoutes from "../routes/college/collegeRoutes.js";
 import companyRoutes from "../routes/company/companyRoutes.js";
+import studentRoutes from "../routes/student/studentRoutes.js";
+
 
 const app = express();
 
@@ -32,6 +34,8 @@ app.use("/", pageRoutes);
 app.use('/api/auth',authRouter);
 app.use("/api/colleges", collegeRoutes);
 app.use("/api/companies",companyRoutes);
+app.use("/api/students",studentRoutes);
+
 
 
 

@@ -16,14 +16,4 @@ router.post("/jobs/:id/delete",protect, deleteJob);
 router.post("/jobs/:id/edit",protect, editJob);
 
 
-
-
-
-
-
-
-
-
-
-
 export default router;

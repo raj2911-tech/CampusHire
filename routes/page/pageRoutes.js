@@ -73,4 +73,14 @@ router.get("/company/jobs/:id", protect, (req, res) => {
   res.render("company/jobDetails",{ jobId: req.params.id });
 });
 
+// <<<------------------------------------Student Routes------------------------------------------------>>>
+
+router.get("/student/dashboard", protect, (req, res) => {
+  res.render("student/dashboard");
+});
+
+router.get("/student/profile", protect, (req, res) => {
+  res.render("student/profile");
+});
+
 export default router;
