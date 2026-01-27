@@ -174,7 +174,7 @@ export const getJob = async (req, res) => {
 
   try {
 
-    const job = await jobModel.findOne({ _id:id});
+    const job = await jobModel.findOne({ _id:id}).populate("collegeId", "name");
 
 
     if (!job) {
