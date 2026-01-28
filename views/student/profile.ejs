@@ -214,9 +214,49 @@
       color: #27ae60;
     }
 
-    .status-not-placed {
+    .status-not-placed{
       background: #fff3cd;
       color: #f39c12;
+    }
+
+    .status-blacklisted {
+      background: #f8d7da;
+      color: #e74c3c;
+    }
+
+    .blacklist-warning {
+      background: #fff3cd;
+      border-left: 4px solid #f39c12;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .blacklist-warning-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #856404;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .blacklist-warning-text {
+      font-size: 14px;
+      color: #856404;
+      line-height: 1.6;
+    }
+
+  
+
+    .blacklist-tag {
+      background: #e74c3c;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
     }
 
     .details-grid {
@@ -594,21 +634,43 @@
       const statusClass = p.isPlaced ? 'status-placed' : 'status-not-placed';
       const statusText = p.isPlaced ? 'Placed' : 'Not Placed';
 
+      // Check if student is blacklisted
+      const isBlacklisted = p.blacklistedBy && p.blacklistedBy.length > 0;
+      const blacklistWarning = isBlacklisted ? `
+        <div class="blacklist-warning">
+          <div class="blacklist-warning-title">
+            <span>⚠️</span>
+            <span>Blacklisted Alert</span>
+          </div>
+          <div class="blacklist-warning-text">
+            You have been blacklisted by college. 
+            You cannot apply to jobs posted by these colleges.<br>
+            Please contact your college placement officer.
+          </div>
+        </div>
+      ` : '';
+
       const skillsHTML = p.academics?.skills && p.academics.skills.length > 0
         ? p.academics.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')
         : '<span style="color: #999; font-style: italic;">No skills added yet</span>';
 
       contentDiv.innerHTML = `
+        ${blacklistWarning}
+        
         <div class="profile-header">
           <div class="profile-avatar">${initial}</div>
           <div class="profile-info">
             <div class="profile-name">${p.name || 'Student Name'}</div>
             <div class="profile-email">${p.email || 'email@example.com'}</div>
-            
             <div class="profile-meta">
               <div class="meta-item">
                 <span class="status-badge ${statusClass}">${statusText}</span>
               </div>
+              ${isBlacklisted ? `
+              <div class="meta-item">
+                <span class="status-badge status-blacklisted">Blacklisted</span>
+              </div>
+              ` : ''}
               <div class="meta-item">🎓 ${p.enrollment_no || 'N/A'}</div>
               <div class="meta-item">🏛️ ${p.collegeId?.name || 'College'}</div>
             </div>

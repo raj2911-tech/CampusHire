@@ -83,4 +83,12 @@ router.get("/student/profile", protect, (req, res) => {
   res.render("student/profile");
 });
 
+router.get("/student/jobs", protect, (req, res) => {
+  res.render("student/jobs");
+});
+
+router.get("/student/jobs/:id", protect, (req, res) => {
+  res.render("student/job");
+});
+
 export default router;
