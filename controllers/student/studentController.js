@@ -124,39 +124,128 @@ export const getJob = async (req, res) => {
     }
   };
 
-export const applyJob = async (req,res) =>{
-  const userId= req.user.id;
-  const {id}=req.params;
+export const applyJob = async (req, res) => {
+    const userId = req.user.id;
+    const { id } = req.params;
+  
+    try {
+      const student = await studentModel.findOne({ userId });
+      if (!student) {
+        return res.status(404).json({ success: false, message: "Student not found" });
+      }
+  
+      const job = await jobModel.findById(id);
+      if (!job) {
+        return res.status(404).json({ success: false, message: "Job not found" });
+      }
+  
+      if (student.blacklistedBy && student.blacklistedBy.length > 0) {
+        return res.status(403).json({
+          success: false,
+          message: "You are blacklisted and cannot apply for jobs"
+        });
+      }
+  
+      if (student.academics.cgpa < job.eligibility.minCGPA) {
+        return res.status(400).json({
+          success: false,
+          message: "Your CGPA does not meet the minimum requirement"
+        });
+      }
 
-  try {
-
-    const student= await studentModel.findOne({userId});
-    if(!student){
-      return res.status(404).json({ success: false, message: "Student not found" });
+      if (student.isPlaced){
+        return res.status(400).json({
+          success: false,
+          message: "Your are already placed and cannot apply for jobs"
+        });
+      }
+  
+      const alreadyApplied = await applicationModel.findOne({
+        studentId: student._id,
+        jobId: job._id
+      });
+  
+      if (alreadyApplied) {
+        return res.status(400).json({
+          success: false,
+          message: "You have already applied for this job"
+        });
+      }
+  
+      const application = new applicationModel({
+        studentId: student._id,
+        jobId: job._id
+      });
+  
+      await application.save();
+  
+      return res.status(201).json({
+        success: true,
+        message: "Job applied successfully"
+      });
+  
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error.message
+      });
     }
+  };
 
-    const job= await jobModel.findOne({_id:id});
-    if(!job){
-      return res.status(404).json({ success: false, message: "Job not found" });
+export const getApplications = async (req, res) => {
+    const userId = req.user.id;
+  
+    try {
+      // 1. Find student
+      const student = await studentModel.findOne({ userId });
+      if (!student) {
+        return res.status(404).json({
+          success: false,
+          message: "Student not found"
+        });
+      }
+  
+      // 2. Fetch applications with minimal data
+      const applications = await applicationModel
+        .find({ studentId: student._id })
+        .select("jobId status appliedAt")
+        .populate({
+          path: "jobId",
+          select: "title salary deadline companyId",
+          populate: {
+            path: "companyId",
+            select: "name"
+          }
+        })
+        .sort({ appliedAt: -1 })
+        .lean();
+  
+      // 3. Format response (exact fields only)
+      const formattedApplications = applications.map(app => ({
+        jobId: app.jobId?._id,
+        title: app.jobId?.title,
+        companyName: app.jobId?.companyId?.name,
+        salary: app.jobId?.salary,
+        deadline: app.jobId?.deadline,
+        appliedOn: app.appliedAt,
+        status: app.status
+      }));
+  
+      // 4. Send response
+      return res.status(200).json({
+        success: true,
+        count: formattedApplications.length,
+        applications: formattedApplications
+      });
+  
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error.message
+      });
     }
+  };
+  
+  
+      
 
-    if(student.blacklistedBy.length>0){
-      return res.status(500).json({ success: false, message: "You are blacklisted. you can not apply for job" });
-    }
-
-    if(student.academics.cgpa<job.eligibility.minCGPA){
-      return res.status(500).json({ success: false, message: "Your CGPA is less than minimum required CGPA" });
-    }
-
-    const application=new applicationModel({userId:user._id, name, placementOfficer});
-            await college.save();
-    
-    
-
-    
-    
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-    
-  }
-}

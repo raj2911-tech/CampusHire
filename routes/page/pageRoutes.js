@@ -91,4 +91,8 @@ router.get("/student/jobs/:id", protect, (req, res) => {
   res.render("student/job");
 });
 
+router.get("/student/applications", protect, (req, res) => {
+  res.render("student/applications");
+});
+
 export default router;
