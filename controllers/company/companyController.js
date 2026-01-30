@@ -1,6 +1,7 @@
 import companyModel from "../../models/companies.js";
 import collegeModel from "../../models/colleges.js";
 import jobModel from "../../models/jobs.js";
+import applicationModel from "../../models/applications.js";
 
 
 export const getProfile = async (req, res) => {
@@ -145,7 +146,7 @@ export const getJobs = async (req, res) => {
 
     const companyId = profile._id;
 
-    const jobs = await jobModel.find({ companyId });
+    const jobs = await jobModel.find({ companyId }).sort({createdAt: -1 }).exec();
 
     if (!jobs) {
       return res.status(404).json({
@@ -269,4 +270,51 @@ export const editJob = async (req, res) => {
   }
 
 
+};
+
+export const getJobApplications = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const company = await companyModel.findOne({ userId });
+    if (!company) return res.status(404).json({ message: "Company not found" });
+
+
+    // Ensure job belongs to company
+    const job = await jobModel.findOne({ _id: id, companyId: company._id });
+ 
+
+    if (!job) return res.status(403).json({ message: "Unauthorized job access" });
+
+    const applications = await applicationModel
+      .find({ jobId:id })
+      .populate("studentId", "name enrollment_no academics.cgpa academics.branch")
+      .sort({ appliedAt: -1 });
+
+    res.json({ success: true, applications });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const updateApplicationStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  
+
+  const allowed = ["SHORTLISTED", "REJECTED", "HIRED"];
+  if (!allowed.includes(status)) {
+    return res.status(400).json({ message: "Invalid status" });
+  }
+
+  const app = await applicationModel.findByIdAndUpdate(
+    id,
+    { status },
+    { new: true }
+  );
+
+  res.json({ success: true, app });
 };

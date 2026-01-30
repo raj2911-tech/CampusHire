@@ -112,6 +112,21 @@
       font-weight: 600;
       color: #333;
     }
+    .application-btn{
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items:end;
+      gap: 8px;
+    }
 
     .back-btn {
       background: #f8f9fa;
@@ -409,7 +424,13 @@
         <button class="menu-toggle" type="button">☰</button>
         <h2>Job Details</h2>
       </div>
-      <a href="/company/jobs" class="back-btn">← Back to Jobs</a>
+      <div class="btn">
+        <a href="/company/jobs/<%= jobId %>/applications" class="application-btn">
+          Applications
+        </a>
+        <a href="/company/jobs" class="back-btn">← Back to Jobs</a>
+      </div>
+      
     </div>
 
     <div class="content-area">
@@ -485,6 +506,10 @@
 
     function displayJob(job) {
       const contentDiv = document.getElementById("content");
+
+      if(job.status==="REJECTED"){
+        document.querySelector(".application-btn").style.display = "none";
+      }
       
       const statusClass = job.status === 'APPROVED' ? 'status-approved' : 
                          job.status === 'REJECTED' ? 'status-rejected' : 'status-pending';
@@ -581,6 +606,7 @@
             </div>
           </div>
         </div>
+        
       `;
     }
 

@@ -1,7 +1,7 @@
 import express from "express";
 import {protect} from "../../middlewares/auth/authMiddleware.js";
 import { getRegisteredColleges } from "../../services/getCollegeNames.js";
-import { createJob, getJobs, getProfile, updateProfile, deleteJob,editJob ,getJob} from "../../controllers/company/companyController.js";
+import { createJob, getJobs, getProfile, updateProfile, deleteJob,editJob ,getJob, getJobApplications, updateApplicationStatus} from "../../controllers/company/companyController.js";
 
 const router = express.Router();
 
@@ -14,6 +14,9 @@ router.get("/jobs",protect ,getJobs);
 router.get("/jobs/:id",protect, getJob);
 router.post("/jobs/:id/delete",protect, deleteJob);
 router.post("/jobs/:id/edit",protect, editJob);
+router.get("/jobs/:id/applications",protect, getJobApplications);
+router.post("/applications/:id/status",protect, updateApplicationStatus);
+
 
 
 export default router;
