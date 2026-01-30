@@ -42,6 +42,10 @@ router.get("/college/jobs", protect, (req, res) => {
 router.get("/college/jobs/:jobId", protect, (req, res) => {
   res.render("college/jobDetails",{ jobId: req.params.jobId });
 });
+
+router.get("/college/reports", protect, (req, res) => {
+  res.render("college/report");
+});
 // <<<------------------------------------Company Routes------------------------------------------------>>>
 
 router.get("/company/dashboard", protect, (req, res) => {

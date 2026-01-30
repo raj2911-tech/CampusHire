@@ -14,10 +14,27 @@ const applicationSchema = new mongoose.Schema(
       required: true
     },
 
+    collegeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "College",                  // reference → colleges._id
+      required: true
+    },
+
+    companyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Company",                  // reference → comppanies._id
+      required: true
+    },
+
     status: {
       type: String,
       enum: ["APPLIED", "SHORTLISTED", "REJECTED", "HIRED"],
       default: "APPLIED"
+    },
+
+    offeredSalary: {
+      type:Number,
+      required:true
     },
 
     appliedAt: {

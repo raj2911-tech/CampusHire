@@ -124,42 +124,48 @@ export const getJob = async (req, res) => {
     }
   };
 
-export const applyJob = async (req, res) => {
+  export const applyJob = async (req, res) => {
     const userId = req.user.id;
-    const { id } = req.params;
+    const { id } = req.params; // jobId
   
     try {
+      // Get student
       const student = await studentModel.findOne({ userId });
       if (!student) {
         return res.status(404).json({ success: false, message: "Student not found" });
       }
   
+      // Get job
       const job = await jobModel.findById(id);
       if (!job) {
         return res.status(404).json({ success: false, message: "Job not found" });
       }
   
-      if (student.blacklistedBy && student.blacklistedBy.length > 0) {
+      // Blacklist check
+      if (student.blacklistedBy?.includes(job.collegeId.toString())) {
         return res.status(403).json({
           success: false,
-          message: "You are blacklisted and cannot apply for jobs"
+          message: "You are blacklisted and cannot apply"
         });
       }
   
+      // CGPA eligibility check
       if (student.academics.cgpa < job.eligibility.minCGPA) {
         return res.status(400).json({
           success: false,
-          message: "Your CGPA does not meet the minimum requirement"
-        });
-      }
-
-      if (student.isPlaced){
-        return res.status(400).json({
-          success: false,
-          message: "Your are already placed and cannot apply for jobs"
+          message: "CGPA does not meet eligibility"
         });
       }
   
+      // Already placed check
+      if (student.isPlaced) {
+        return res.status(400).json({
+          success: false,
+          message: "Already placed, cannot apply"
+        });
+      }
+  
+      // Prevent duplicate apply
       const alreadyApplied = await applicationModel.findOne({
         studentId: student._id,
         jobId: job._id
@@ -168,13 +174,18 @@ export const applyJob = async (req, res) => {
       if (alreadyApplied) {
         return res.status(400).json({
           success: false,
-          message: "You have already applied for this job"
+          message: "Already applied for this job"
         });
       }
   
+      // Create application (IMPORTANT NEW FIELDS)
       const application = new applicationModel({
         studentId: student._id,
-        jobId: job._id
+        jobId: job._id,
+        collegeId: job.collegeId,
+        companyId: job.companyId,
+        status: "APPLIED",
+        offeredSalary:job.salary
       });
   
       await application.save();
@@ -185,12 +196,14 @@ export const applyJob = async (req, res) => {
       });
   
     } catch (error) {
+      console.error(error);
       return res.status(500).json({
         success: false,
         message: error.message
       });
     }
   };
+  
 
 export const getApplications = async (req, res) => {
     const userId = req.user.id;

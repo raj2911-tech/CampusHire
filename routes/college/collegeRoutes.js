@@ -2,6 +2,7 @@ import express from "express";
 import { getRegisteredColleges } from "../../services/getCollegeNames.js";
 import {blackList, getJobs, getProfile, getStudent, jobAction, unBlackList, updateProfile, viewStudents, getJob} from "../../controllers/college/collegeController.js"
 import {protect} from "../../middlewares/auth/authMiddleware.js";
+import { generatePlacementReport } from "../../services/reportService.js";
 
 const router = express.Router();
 
@@ -16,6 +17,7 @@ router.get("/student/:id", protect, getStudent);
 router.get("/jobs", protect, getJobs);
 router.get("/jobs/:jobId", protect, getJob);
 router.post("/jobs/:id/:status", protect, jobAction);
+router.get("/reports/placement/pdf",protect,generatePlacementReport);
 
 
 
