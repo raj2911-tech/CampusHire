@@ -1,17 +1,17 @@
 import express from "express";
-import {protect} from "../../middlewares/auth/authMiddleware.js";
+import {protect, authorize} from "../../middlewares/auth/authMiddleware.js";
 import { addSkill, applyJob, getApplications, getJob, getJobs, getProfile} from "../../controllers/student/studentController.js";
 
 
 const router = express.Router();
 
 
-router.get("/profile",protect,getProfile);
-router.post("/skills",protect,addSkill);
-router.get("/jobs",protect,getJobs);
-router.get("/applications",protect,getApplications);
-router.get("/jobs/:id",protect,getJob);
-router.post("/jobs/:id/apply",protect,applyJob);
+router.get("/profile",protect,authorize("STUDENT"),getProfile);
+router.post("/skills",protect,authorize("STUDENT"),addSkill);
+router.get("/jobs",protect,authorize("STUDENT"),getJobs);
+router.get("/applications",protect,authorize("STUDENT"),getApplications);
+router.get("/jobs/:id",protect,authorize("STUDENT"),getJob);
+router.post("/jobs/:id/apply",protect,authorize("STUDENT"),applyJob);
 
 
 

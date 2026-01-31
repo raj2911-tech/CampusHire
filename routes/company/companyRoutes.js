@@ -1,5 +1,5 @@
 import express from "express";
-import {protect} from "../../middlewares/auth/authMiddleware.js";
+import {protect, authorize} from "../../middlewares/auth/authMiddleware.js";
 import { getRegisteredColleges } from "../../services/getCollegeNames.js";
 import { createJob, getJobs, getProfile, updateProfile, deleteJob,editJob ,getJob, getJobApplications, updateApplicationStatus} from "../../controllers/company/companyController.js";
 import { generateRecruitmentReport } from "../../services/reportService.js";
@@ -7,17 +7,17 @@ import { generateRecruitmentReport } from "../../services/reportService.js";
 const router = express.Router();
 
 
-router.get("/public", getRegisteredColleges); // PUBLIC (no auth needed)
-router.get("/profile",protect ,getProfile);
-router.post("/profile/update",protect ,updateProfile);
-router.post("/job/create",protect,createJob);
-router.get("/jobs",protect ,getJobs);
-router.get("/jobs/:id",protect, getJob);
-router.post("/jobs/:id/delete",protect, deleteJob);
-router.post("/jobs/:id/edit",protect, editJob);
-router.get("/jobs/:id/applications",protect, getJobApplications);
-router.post("/applications/:id/status",protect, updateApplicationStatus);
-router.get("/reports/recruitment/pdf",protect ,generateRecruitmentReport);
+router.get("/public",authorize("COMPANY"), getRegisteredColleges); // PUBLIC (no auth needed)
+router.get("/profile",protect,authorize("COMPANY"),getProfile);
+router.post("/profile/update",protect ,authorize("COMPANY"),updateProfile);
+router.post("/job/create",protect,authorize("COMPANY"),createJob);
+router.get("/jobs",protect ,authorize("COMPANY"),getJobs);
+router.get("/jobs/:id",protect,authorize("COMPANY"), getJob);
+router.post("/jobs/:id/delete",protect,authorize("COMPANY"), deleteJob);
+router.post("/jobs/:id/edit",protect,authorize("COMPANY"), editJob);
+router.get("/jobs/:id/applications",protect,authorize("COMPANY"), getJobApplications);
+router.post("/applications/:id/status",protect,authorize("COMPANY"), updateApplicationStatus);
+router.get("/reports/recruitment/pdf",protect ,authorize("COMPANY"),generateRecruitmentReport);
 
 
 
