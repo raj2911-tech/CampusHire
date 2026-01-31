@@ -81,6 +81,10 @@ router.get("/company/jobs/:id/applications", protect, (req, res) => {
   res.render("company/jobApplications",{ jobId: req.params.id });
 });
 
+router.get("/company/reports", protect, (req, res) => {
+  res.render("company/report");
+});
+
 // <<<------------------------------------Student Routes------------------------------------------------>>>
 
 router.get("/student/dashboard", protect, (req, res) => {

@@ -123,7 +123,176 @@ export const generatePlacementReport = async (req, res) => {
 
     placedStudents.forEach((s, i) => {
       doc.fontSize(10).text(
-        `${i + 1}. ${s.name} | ${s.enrollment} | ${s.branch} | ${s.company} | ₹${s.salary}`
+        `${i + 1}. ${s.name} | ${s.enrollment} | ${s.branch} | ${s.company} | ${s.salary}`
+      );
+    });
+
+    doc.end();
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const generateRecruitmentReport = async (req, res) => {
+  try {
+    const { year } = req.query;   // 👈 year from UI
+    const userId = req.user.id;
+
+    const company = await companyModel.findOne({ userId });
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    const companyId = new mongoose.Types.ObjectId(company._id);
+
+    // ================= SUMMARY COUNTS (YEAR FILTER) =================
+
+    const summary = await applicationModel.aggregate([
+      { $match: { companyId } },
+
+      // Join students to filter by graduation year
+      {
+        $lookup: {
+          from: "students",
+          localField: "studentId",
+          foreignField: "_id",
+          as: "student"
+        }
+      },
+      { $unwind: "$student" },
+
+      { $match: { "student.academics.graduationYear": Number(year) } },
+
+      {
+        $group: {
+          _id: null,
+          totalApplied: { $sum: 1 },
+          shortlisted: {
+            $sum: { $cond: [{ $eq: ["$status", "SHORTLISTED"] }, 1, 0] }
+          },
+          hired: {
+            $sum: { $cond: [{ $eq: ["$status", "HIRED"] }, 1, 0] }
+          }
+        }
+      }
+    ]);
+
+    const stats = summary[0] || {
+      totalApplied: 0,
+      shortlisted: 0,
+      hired: 0
+    };
+
+    // ================= COLLEGE-WISE =================
+
+    const collegeStats = await applicationModel.aggregate([
+      { $match: { companyId } },
+
+      {
+        $lookup: {
+          from: "students",
+          localField: "studentId",
+          foreignField: "_id",
+          as: "student"
+        }
+      },
+      { $unwind: "$student" },
+
+      { $match: { "student.academics.graduationYear": Number(year) } },
+
+      {
+        $group: {
+          _id: "$collegeId",
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $lookup: {
+          from: "colleges",
+          localField: "_id",
+          foreignField: "_id",
+          as: "college"
+        }
+      },
+      { $unwind: "$college" },
+
+      {
+        $project: {
+          collegeName: "$college.name",
+          count: 1
+        }
+      }
+    ]);
+
+    // ================= HIRED STUDENTS LIST =================
+
+    const hiredStudents = await applicationModel.aggregate([
+      { $match: { companyId, status: "HIRED" } },
+
+      {
+        $lookup: {
+          from: "students",
+          localField: "studentId",
+          foreignField: "_id",
+          as: "student"
+        }
+      },
+      { $unwind: "$student" },
+
+      { $match: { "student.academics.graduationYear": Number(year) } },
+
+      {
+        $lookup: {
+          from: "colleges",
+          localField: "collegeId",
+          foreignField: "_id",
+          as: "college"
+        }
+      },
+      { $unwind: "$college" },
+
+      {
+        $project: {
+          name: "$student.name",
+          email: "$student.email",
+          branch: "$student.academics.branch",
+          college: "$college.name"
+        }
+      }
+    ]);
+
+    // ================= PDF =================
+
+    const doc = new PDFDocument({ margin: 40 });
+    const fileName = `Recruitment_Report_${company.name}_${year}.pdf`;
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
+    doc.pipe(res);
+
+    doc.fontSize(20).text(`${company.name} Recruitment Report ${year}`, {
+      align: "center"
+    });
+    doc.moveDown();
+
+    doc.fontSize(14).text("SUMMARY");
+    doc.fontSize(12).text(`Total Applied: ${stats.totalApplied}`);
+    doc.text(`Shortlisted: ${stats.shortlisted}`);
+    doc.text(`Hired: ${stats.hired}`);
+    doc.moveDown();
+
+    doc.fontSize(14).text("COLLEGE-WISE APPLICATIONS");
+    collegeStats.forEach(c => {
+      doc.fontSize(12).text(`${c.collegeName}: ${c.count}`);
+    });
+    doc.moveDown();
+
+    doc.fontSize(14).text("HIRED STUDENTS");
+    hiredStudents.forEach((s, i) => {
+      doc.fontSize(11).text(
+        `${i + 1}. ${s.name} | ${s.college} | ${s.branch} | ${s.email}`
       );
     });
 

@@ -2,6 +2,7 @@ import express from "express";
 import {protect} from "../../middlewares/auth/authMiddleware.js";
 import { getRegisteredColleges } from "../../services/getCollegeNames.js";
 import { createJob, getJobs, getProfile, updateProfile, deleteJob,editJob ,getJob, getJobApplications, updateApplicationStatus} from "../../controllers/company/companyController.js";
+import { generateRecruitmentReport } from "../../services/reportService.js";
 
 const router = express.Router();
 
@@ -16,6 +17,8 @@ router.post("/jobs/:id/delete",protect, deleteJob);
 router.post("/jobs/:id/edit",protect, editJob);
 router.get("/jobs/:id/applications",protect, getJobApplications);
 router.post("/applications/:id/status",protect, updateApplicationStatus);
+router.get("/reports/recruitment/pdf",protect ,generateRecruitmentReport);
+
 
 
 

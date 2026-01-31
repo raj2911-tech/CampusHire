@@ -124,7 +124,7 @@ export const getJob = async (req, res) => {
     }
   };
 
-  export const applyJob = async (req, res) => {
+export const applyJob = async (req, res) => {
     const userId = req.user.id;
     const { id } = req.params; // jobId
   
@@ -203,7 +203,6 @@ export const getJob = async (req, res) => {
       });
     }
   };
-  
 
 export const getApplications = async (req, res) => {
     const userId = req.user.id;

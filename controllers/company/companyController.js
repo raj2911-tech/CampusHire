@@ -2,6 +2,7 @@ import companyModel from "../../models/companies.js";
 import collegeModel from "../../models/colleges.js";
 import jobModel from "../../models/jobs.js";
 import applicationModel from "../../models/applications.js";
+import studentModel from "../../models/students.js"
 
 
 export const getProfile = async (req, res) => {
@@ -315,6 +316,19 @@ export const updateApplicationStatus = async (req, res) => {
     { status },
     { new: true }
   );
+  
+  if(status === "HIRED"){
+    const student = await studentModel.findByIdAndUpdate(
+      app.studentId,
+      {isPlaced:true},
+      {new: true}
+    );
+  
+    if(!student){
+      return res.status(400).json({ message: "Student not found" });
+    }
+  }
+ 
 
   res.json({ success: true, app });
 };
