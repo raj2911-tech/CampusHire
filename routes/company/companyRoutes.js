@@ -3,11 +3,13 @@ import {protect, authorize} from "../../middlewares/auth/authMiddleware.js";
 import { getRegisteredColleges } from "../../services/getCollegeNames.js";
 import { createJob, getJobs, getProfile, updateProfile, deleteJob,editJob ,getJob, getJobApplications, updateApplicationStatus} from "../../controllers/company/companyController.js";
 import { generateRecruitmentReport } from "../../services/reportService.js";
+import { companyStats } from "../../services/statistics.js";
 
 const router = express.Router();
 
 
-router.get("/public",authorize("COMPANY"), getRegisteredColleges); // PUBLIC (no auth needed)
+router.get("/public", getRegisteredColleges); // PUBLIC (no auth needed)
+router.get("/stats",protect,authorize("COMPANY"), companyStats); // PUBLIC (no auth needed)
 router.get("/profile",protect,authorize("COMPANY"),getProfile);
 router.post("/profile/update",protect ,authorize("COMPANY"),updateProfile);
 router.post("/job/create",protect,authorize("COMPANY"),createJob);

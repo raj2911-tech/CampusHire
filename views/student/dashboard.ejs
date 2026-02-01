@@ -474,7 +474,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <h1>Student Portal</h1>
-      <p>Placement Management System</p>
+      <p>CampusHire</p>
     </div>
     <nav>
       <a href="/student/dashboard" class="active">
@@ -519,22 +519,22 @@
         <div class="stat-card">
           <div class="stat-card-icon">💼</div>
           <div class="stat-card-label">Available Jobs</div>
-          <div class="stat-card-value">-</div>
+          <div class="stat-card-value" id="jobs"></div>
         </div>
         <div class="stat-card">
           <div class="stat-card-icon">📝</div>
           <div class="stat-card-label">My Applications</div>
-          <div class="stat-card-value">-</div>
+          <div class="stat-card-value" id="myApplications"></div>
         </div>
         <div class="stat-card">
           <div class="stat-card-icon">⏳</div>
           <div class="stat-card-label">Pending Review</div>
-          <div class="stat-card-value">-</div>
+          <div class="stat-card-value" id="pendingApplications"></div>
         </div>
         <div class="stat-card">
           <div class="stat-card-icon">✅</div>
           <div class="stat-card-label">Shortlisted</div>
-          <div class="stat-card-value">-</div>
+          <div class="stat-card-value" id="shortlistedApplications"></div>
         </div>
       </div>
 
@@ -612,11 +612,33 @@
         
         
         const jobsData = await jobsRes.json();
-        console.log(jobsRes)
-      
-
+        
         displayLatestJobs(jobsData.jobs || []);
+        loadStats();
 
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+        showError();
+      }
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch("/api/students/stats", {
+          credentials: "include"
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          document.getElementById("jobs").innerText=data.jobs;
+          document.getElementById("myApplications").innerText=data.myApplications;
+          document.getElementById("pendingApplications").innerText=data.pendingApplications;
+          document.getElementById("shortlistedApplications").innerText=data.shortlistedApplications;
+
+
+        } else {
+          showError();
+        }
       } catch (error) {
         console.error('Error loading dashboard:', error);
         showError();

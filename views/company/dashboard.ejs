@@ -448,7 +448,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <h1>Company Portal</h1>
-      <p>Recruitment Management</p>
+      <p>CampusHire</p>
     </div>
     <nav>
       <a href="/company/dashboard" class="active">
@@ -502,12 +502,12 @@
         <div class="stat-card">
           <div class="stat-card-icon">📝</div>
           <div class="stat-card-label">Total Applications</div>
-          <div class="stat-card-value">-</div>
+          <div class="stat-card-value" id="applications"></div>
         </div>
         <div class="stat-card">
           <div class="stat-card-icon">✅</div>
           <div class="stat-card-label">Shortlisted</div>
-          <div class="stat-card-value">-</div>
+          <div class="stat-card-value" id="shortlisted"></div>
         </div>
       </div>
 
@@ -569,6 +569,28 @@
         if (data.success && data.jobs) {
           updateStats(data.jobs);
           displayPendingJobs(data.jobs);
+          loadStats();
+
+        } else {
+          showError();
+        }
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+        showError();
+      }
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch("/api/companies/stats", {
+          credentials: "include"
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          document.getElementById("applications").innerText=data.applications;
+          document.getElementById("shortlisted").innerText=data.shortlistedStudents;
+
         } else {
           showError();
         }

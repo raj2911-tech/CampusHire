@@ -86,7 +86,7 @@ export const getJobs = async (req, res) => {
           status: "APPROVED",
           "eligibility.allowedBranches": { $in: [student.academics.branch] }
         })
-        .populate("companyId", "name");
+        .populate("companyId", "name").sort({ createdAt: -1 });
         
   
       return res.json({

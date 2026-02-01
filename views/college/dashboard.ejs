@@ -524,7 +524,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <h1>College Dashboard</h1>
-      <p>Placement Management System</p>
+      <p>CampusHire</p>
     </div>
     <nav>
       <a href="/college/dashboard" class="active">
@@ -544,7 +544,7 @@
         <span>Job Postings</span>
       </a>
       <a href="/college/reports">
-        <span>📈</span>
+        <span>📝</span>
         <span>Reports</span>
       </a>
     </nav>
@@ -570,14 +570,11 @@
         </div>
         
         <div class="stat-card">
-          Total Students: <strong>1,200</strong>
+          Total Students: <strong id="students"></strong>
         </div>
         
         <div class="stat-card">
-          Active Job Postings: <strong>12</strong>
-        </div>
-        <div class="stat-card">
-          Placed Students: <strong>450 (37.5%)</strong>
+          Placed Students: <strong id="placedStudents"></strong>
         </div>
       </div>
 
@@ -860,6 +857,29 @@
       fetchJobs();
     });
 
+    async function loadStats() {
+  try {
+    const response = await fetch("/api/colleges/stats");
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch stats");
+    }
+
+    const data = await response.json();
+
+    document.getElementById("students").innerText=data.students;
+    document.getElementById("placedStudents").innerText=data.placedStudents;
+
+
+  } catch (error) {
+    console.error("Stats error:", error);
+    window.location.href = "/login";
+  }
+}
+
+loadStats();
+
+
     async function logout() {
       try {
         await fetch("/api/auth/logout", {
@@ -872,6 +892,8 @@
         window.location.href = "/login";
       }
     }
+
+    
   </script>
 </body>
 
