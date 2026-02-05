@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Company Profile</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      background: #f5f7fa;
+
+    }
+
+    .sidebar {
+      width: 260px;
+      background: white;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+      transition: transform 0.3s ease;
+      transform: translateX(0);
+    }
+
+    .sidebar.collapsed {
+      transform: translateX(-260px);
+    }
+
+    .sidebar-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 25px 20px;
+      color: white;
+    }
+
+    .sidebar-header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .sidebar-header p {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .sidebar nav {
+      padding: 20px 0;
+    }
+
+    .sidebar nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 15px;
+      font-weight: 500;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar nav a:hover {
+      background: #f8f9fa;
+      border-left-color: #667eea;
+    }
+
+    .sidebar nav a.active {
+      background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+      color: #667eea;
+      border-left-color: #667eea;
+    }
+
+    .sidebar nav a span:first-child {
+      font-size: 18px;
+      width: 24px;
+      text-align: center;
+    }
+
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+      background: #f5f7fa;
+
+    }
+
+    .main-content.expanded {
+      margin-left: 0;
+    }
+
+    .top-bar {
+      background: white;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .top-bar h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .back-btn {
+      background: #f8f9fa;
+      color: #333;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .back-btn:hover {
+      background: #e9ecef;
+    }
+
+    .content-area {
+      padding: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .profile-header {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 40px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .profile-info {
+      flex: 1;
+    }
+
+    .profile-name {
+      font-size: 28px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .profile-tagline {
+      font-size: 16px;
+      color: #667eea;
+      margin-bottom: 12px;
+    }
+
+    .profile-meta {
+      display: flex;
+      gap: 20px;
+      font-size: 13px;
+      color: #666;
+      flex-wrap: wrap;
+    }
+
+    .profile-meta span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .profile-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .profile-card.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .info-row {
+      display: flex;
+      padding: 12px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #666;
+      min-width: 140px;
+      font-size: 14px;
+    }
+
+    .info-value {
+      color: #333;
+      font-size: 14px;
+      flex: 1;
+    }
+
+    .about-text {
+      color: #333;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .specialties-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .specialty-tag {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+      color: #667eea;
+      padding: 6px 14px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 2px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .website-link {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .website-link:hover {
+      text-decoration: underline;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: white;
+      font-size: 16px;
+    }
+
+    .error {
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      color: #e74c3c;
+      font-size: 16px;
+    }
+
+    .menu-toggle {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #333;
+      padding: 8px;
+      border-radius: 6px;
+      transition: background 0.2s ease;
+    }
+
+    .menu-toggle:hover {
+      background: #f0f0f0;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 99;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar.collapsed {
+        transform: translateX(-260px);
+      }
+
+      .sidebar:not(.collapsed) {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .overlay.active {
+        display: block;
+      }
+
+      .profile-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-header {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .profile-meta {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .info-row {
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .info-label {
+        min-width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h1>Student Portal</h1>
+      <p>CampusHire</p>
+    </div>
+    <nav>
+      <a href="/student/dashboard">
+        <span>📊</span>
+        <span>Dashboard</span>
+      </a>
+      <a href="/student/profile">
+        <span>👤</span>
+        <span>My Profile</span>
+      </a>
+      <a href="/student/jobs" class="active">
+        <span>💼</span>
+        <span>Available Jobs</span>
+      </a>
+      <a href="/student/applications">
+        <span>📝</span>
+        <span>My Applications</span>
+      </a>
+    </nav>
+  </aside>
+
+  <div class="overlay" id="overlay"></div>
+
+  <main class="main-content" id="mainContent">
+    <div class="top-bar">
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <button class="menu-toggle" type="button">☰</button>
+        <h2>Company Profile</h2>
+      </div>
+      <a href="/student/jobs" class="back-btn">← Back to Jobs</a>
+    </div>
+
+    <div class="content-area">
+      <div id="profileContent">
+        <div class="loading">Loading company profile...</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const overlay = document.getElementById('overlay');
+      
+      if (sidebar && mainContent) {
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('expanded');
+        
+        if (window.innerWidth <= 768 && overlay) {
+          overlay.classList.toggle('active');
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuToggle = document.querySelector('.menu-toggle');
+      const overlay = document.getElementById('overlay');
+      
+      if (menuToggle) {
+        menuToggle.addEventListener('click', toggleSidebar);
+      }
+      
+      if (overlay) {
+        overlay.addEventListener('click', function() {
+          if (window.innerWidth <= 768) {
+            toggleSidebar();
+          }
+        });
+      }
+    });
+
+    // Extract job ID from URL
+    const jobId = window.location.pathname.split("/")[3]; // /student/jobs/:id/profile
+
+    async function loadProfile() {
+      try {
+        const res = await fetch(`/api/students/jobs/${jobId}/profile`, {
+          credentials: "include"
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch company profile");
+        }
+
+        const data = await res.json();
+
+        if (data.success && data.profile) {
+          displayProfile(data.profile);
+        } else {
+          document.getElementById("profileContent").innerHTML = 
+            '<div class="error">Failed to load company profile</div>';
+        }
+      } catch (error) {
+        document.getElementById("profileContent").innerHTML = 
+          '<div class="error"><div style="font-size: 48px; margin-bottom: 16px;">⚠️</div><div>Error loading company profile. Please try again.</div></div>';
+      }
+    }
+
+    function displayProfile(profile) {
+      const contentDiv = document.getElementById("profileContent");
+      
+      const initials = profile.name ? 
+        profile.name.split(' ').map(word => word[0]).join('').substring(0, 2).toUpperCase() : 
+        'CO';
+      
+      const specialtiesHtml = profile.specialties && profile.specialties.length > 0 ?
+        profile.specialties.map(s => `<span class="specialty-tag">${s}</span>`).join('') :
+        '<span style="color: #999; font-style: italic;">No specialties listed</span>';
+
+      const websiteHtml = profile.website ? 
+        `<a href="${profile.website}" target="_blank" class="website-link">🔗 ${profile.website}</a>` :
+        '<span style="color: #999;">Not provided</span>';
+
+      contentDiv.innerHTML = `
+        <div class="profile-header">
+          <div class="profile-avatar">${initials}</div>
+          <div class="profile-info">
+            <div class="profile-name">${profile.name || 'N/A'}</div>
+            <div class="profile-tagline">${profile.industry || 'Company'}</div>
+          </div>
+        </div>
+
+        <div class="profile-grid">
+          <!-- About Company -->
+          <div class="profile-card full-width">
+            <div class="card-header">
+              <div class="card-icon">📝</div>
+              <div class="card-title">About ${profile.name || 'Company'}</div>
+            </div>
+            <div class="about-text">
+              ${profile.about || 'No description provided'}
+            </div>
+          </div>
+
+          <!-- Company Details -->
+          <div class="profile-card">
+            <div class="card-header">
+              <div class="card-icon">🏢</div>
+              <div class="card-title">Company Information</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Industry:</div>
+              <div class="info-value">${profile.industry || 'N/A'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Founded Year:</div>
+              <div class="info-value">${profile.foundedYear || 'N/A'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Company Size:</div>
+              <div class="info-value">${profile.companySize || 'N/A'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Headquarters:</div>
+              <div class="info-value">${profile.headquarters || 'N/A'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Website:</div>
+              <div class="info-value">${websiteHtml}</div>
+            </div>
+          </div>
+
+          <!-- Contact Person -->
+          ${profile.contactPerson ? `
+          <div class="profile-card">
+            <div class="card-header">
+              <div class="card-icon">👤</div>
+              <div class="card-title">Contact Person</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Name:</div>
+              <div class="info-value">${profile.contactPerson.name || 'N/A'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Email:</div>
+              <div class="info-value">${profile.contactPerson.email || 'N/A'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Mobile:</div>
+              <div class="info-value">${profile.contactPerson.mobile || 'N/A'}</div>
+            </div>
+          </div>
+          ` : ''}
+
+          <!-- Specialties -->
+          <div class="profile-card">
+            <div class="card-header">
+              <div class="card-icon">🎯</div>
+              <div class="card-title">Specialties</div>
+            </div>
+            <div class="specialties-list">
+              ${specialtiesHtml}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    loadProfile();
+  </script>
+</body>
+</html>

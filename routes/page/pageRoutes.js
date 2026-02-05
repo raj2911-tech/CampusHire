@@ -107,4 +107,8 @@ router.get("/student/applications", protect, (req, res) => {
   res.render("student/applications");
 });
 
+router.get("/student/jobs/:id/profile", protect, (req, res) => {
+  res.render("student/companyProfile");
+});
+
 export default router;

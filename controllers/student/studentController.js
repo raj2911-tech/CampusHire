@@ -258,6 +258,46 @@ export const getApplications = async (req, res) => {
     }
   };
   
-  
+ 
       
 
+  export const getCompanyProfile = async (req, res) => {
+    const { id } = req.params;
+  
+    try {
+      // Find the job first
+      const job = await jobModel.findById(id);
+  
+      if (!job) {
+        return res.status(404).json({
+          success: false,
+          message: "Company not found"
+        });
+      }
+
+      console.log(job.companyId )
+  
+      // Find company profile using userId from job
+      const profile = await companyModel.findOne({ _id: job.companyId });
+  
+      if (!profile) {
+        return res.status(404).json({
+          success: false,
+          message: "Profile not found"
+        });
+      }
+  
+      return res.status(200).json({
+        success: true,
+        profile,
+        email: profile.email // or job.email if that’s where it lives
+      });
+  
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  };
+  
