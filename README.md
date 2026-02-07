@@ -125,13 +125,6 @@ CampusHire/
 └── server.js
 ```
 
-
-## 📸 Screenshots
-
-Screenshots are available in the **/screenshots** folder.
-
----
-
 ## 🔐 Authentication & Security
 
 - JWT-based authentication
