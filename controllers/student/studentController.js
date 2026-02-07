@@ -257,11 +257,8 @@ export const getApplications = async (req, res) => {
       });
     }
   };
-  
- 
-      
 
-  export const getCompanyProfile = async (req, res) => {
+export const getCompanyProfile = async (req, res) => {
     const { id } = req.params;
   
     try {
@@ -275,7 +272,6 @@ export const getApplications = async (req, res) => {
         });
       }
 
-      console.log(job.companyId )
   
       // Find company profile using userId from job
       const profile = await companyModel.findOne({ _id: job.companyId });
