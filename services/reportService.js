@@ -79,11 +79,23 @@ export const generatePlacementReport = async (req, res) => {
       { $unwind: "$company" },
 
       {
+        $lookup: {
+          from: "jobs",
+          localField: "jobId",
+          foreignField: "_id",
+          as: "job"
+        }
+      },
+      { $unwind: "$job" },
+      
+
+      {
         $project: {
           name: "$student.name",
           enrollment: "$student.enrollment_no",
           branch: "$student.academics.branch",
           company: "$company.name",
+          jobRole: "$job.title",
           salary: "$offeredSalary"
         }
       }
@@ -91,43 +103,159 @@ export const generatePlacementReport = async (req, res) => {
 
     // ================= PDF GENERATION =================
 
-    const doc = new PDFDocument({ margin: 40 });
-    const fileName = `Placement_Report_${college.name}_${year}.pdf`;
+const doc = new PDFDocument({ margin: 50, size: "A4" });
+const fileName = `Placement_Report_${college.name}_${year}.pdf`;
 
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
-    doc.pipe(res);
+res.setHeader("Content-Type", "application/pdf");
+res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
+doc.pipe(res);
 
-    // Title
-    doc.fontSize(20).text(`${college.name} Placement Report ${year}`, { align: "center" });
-    doc.moveDown();
+// Helper functions
+const drawLine = () => {
+  doc
+    .strokeColor("#aaaaaa")
+    .lineWidth(1)
+    .moveTo(50, doc.y)
+    .lineTo(545, doc.y)
+    .stroke();
+  doc.moveDown();
+};
 
-    // Summary Section
-    doc.fontSize(14).text("PLACEMENT SUMMARY");
-    doc.fontSize(12).text(`Total Students: ${totalStudents}`);
-    doc.text(`Placed Students: ${placedStudentsCount}`);
-    doc.text(`Unplaced Students: ${totalStudents - placedStudentsCount}`);
-    doc.text(`Companies Visited: ${companiesVisited.length}`);
-    doc.moveDown();
+const sectionTitle = (title) => {
+  doc.moveDown(1);
+  doc.fontSize(14).fillColor("#003366").text(title, { bold: true });
+  doc.moveDown(0.3);
+  drawLine();
+  doc.fillColor("black");
+};
 
-    // Branch Stats
-    doc.fontSize(14).text("BRANCH WISE PLACEMENT");
-    branchStats.forEach(b => {
-      doc.fontSize(12).text(`${b._id}: ${b.placed}/${b.total} placed`);
+// ================= HEADER =================
+
+doc
+  .fontSize(22)
+  .fillColor("#003366")
+  .text(college.name, { align: "center" });
+
+doc
+  .fontSize(14)
+  .fillColor("#555")
+  .text(`Placement Report - ${year}`, { align: "center" });
+
+doc.moveDown(1.5);
+drawLine();
+
+// ================= SUMMARY =================
+
+sectionTitle("Placement Summary");
+
+doc.fontSize(12);
+doc.text(`Total Students: ${totalStudents}`);
+doc.text(`Placed Students: ${placedStudentsCount}`);
+doc.text(`Unplaced Students: ${totalStudents - placedStudentsCount}`);
+doc.text(`Companies Visited: ${companiesVisited.length}`);
+
+doc.moveDown();
+
+// ================= BRANCH WISE =================
+
+sectionTitle("Branch Wise Placement");
+
+branchStats.forEach(b => {
+  const percentage = ((b.placed / b.total) * 100).toFixed(1);
+  doc
+    .fontSize(12)
+    .text(
+      `${b._id.padEnd(1)} : ${b.placed}/${b.total} placed (${percentage}%)`
+    );
+});
+
+doc.moveDown();
+
+// ================= PLACED STUDENTS TABLE =================
+
+sectionTitle("Placed Students Details");
+
+// Column config
+const tableTop = doc.y;
+const rowHeight = 20;
+
+const columns = [
+  { label: "No", x: 50, width: 30 },
+  { label: "Name", x: 85, width: 110 },
+  { label: "Branch", x: 200, width: 50 },
+  { label: "Company", x: 255, width: 90 },
+  { label: "Role", x: 350, width: 120 },
+  { label: "Salary", x: 475, width: 70 }
+];
+
+// ===== HEADER =====
+doc.rect(50, tableTop, 495, rowHeight).fill("#003366");
+
+doc.fillColor("white").fontSize(11);
+columns.forEach(col => {
+  doc.text(col.label, col.x, tableTop + 5, { width: col.width, align: "left" });
+});
+
+doc.fillColor("black");
+
+let y = tableTop + rowHeight;
+
+// ===== ROWS =====
+placedStudents.forEach((s, i) => {
+  // Page break
+  if (y > 750) {
+    doc.addPage();
+    y = 50;
+  }
+
+  const rowData = [
+    String(i + 1),
+    s.name,
+    s.branch,
+    s.company,
+    s.jobRole,
+    String(s.salary)
+  ];
+
+  // Calculate max row height
+  let maxHeight = rowHeight;
+
+  rowData.forEach((text, index) => {
+    const h = doc.heightOfString(text, {
+      width: columns[index].width
     });
-    doc.moveDown();
+    maxHeight = Math.max(maxHeight, h + 8);
+  });
 
-    // Placed Students Table
-    doc.fontSize(14).text("PLACED STUDENTS LIST");
-    doc.moveDown();
+  // Draw row borders
+  doc.rect(50, y, 495, maxHeight).stroke("#dddddd");
 
-    placedStudents.forEach((s, i) => {
-      doc.fontSize(10).text(
-        `${i + 1}. ${s.name} | ${s.enrollment} | ${s.branch} | ${s.company} | ${s.salary}`
-      );
+  // Draw cells
+  rowData.forEach((text, index) => {
+    doc.text(text, columns[index].x, y + 5, {
+      width: columns[index].width,
+      align: "left"
     });
+  });
 
-    doc.end();
+  y += maxHeight;
+});
+
+
+// ================= FOOTER =================
+
+doc.moveDown(2);
+drawLine();
+
+doc
+  .fontSize(9)
+  .fillColor("#666")
+  .text(
+    `Generated on ${new Date().toLocaleDateString()} | ${college.name}`,
+    { align: "center" }
+  );
+
+doc.end();
 
   } catch (err) {
     console.error(err);
@@ -265,38 +393,156 @@ export const generateRecruitmentReport = async (req, res) => {
 
     // ================= PDF =================
 
-    const doc = new PDFDocument({ margin: 40 });
-    const fileName = `Recruitment_Report_${company.name}_${year}.pdf`;
 
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
-    doc.pipe(res);
 
-    doc.fontSize(20).text(`${company.name} Recruitment Report ${year}`, {
-      align: "center"
+const doc = new PDFDocument({ margin: 50, size: "A4" });
+const fileName = `Recruitment_Report_${company.name}_${year}.pdf`;
+
+res.setHeader("Content-Type", "application/pdf");
+res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
+doc.pipe(res);
+
+// ---------- Helpers ----------
+const drawLine = () => {
+  doc.moveDown(0.3);
+  doc.strokeColor("#aaaaaa")
+     .lineWidth(1)
+     .moveTo(50, doc.y)
+     .lineTo(545, doc.y)
+     .stroke();
+  doc.moveDown();
+};
+
+const sectionTitle = (title) => {
+  doc.moveDown(1);
+  doc.fontSize(14).fillColor("#003366").text(title);
+  drawLine();
+  doc.fillColor("black");
+};
+
+// ---------- Header ----------
+doc.fontSize(22).fillColor("#003366").text(company.name, { align: "center" });
+doc.fontSize(14).fillColor("#555").text(`Recruitment Report - ${year}`, { align: "center" });
+
+doc.moveDown(1.5);
+drawLine();
+
+// ---------- Summary ----------
+sectionTitle("Recruitment Summary");
+
+doc.fontSize(12);
+doc.text(`Total Applications : ${stats.totalApplied}`);
+doc.text(`Shortlisted : ${stats.shortlisted}`);
+doc.text(`Hired : ${stats.hired}`);
+
+// ---------- College-wise Table ----------
+sectionTitle("College-wise Applications");
+
+const collegeColumns = [
+  { label: "No", x: 60, width: 40 },
+  { label: "College Name", x: 110, width: 300 },
+  { label: "Applications", x: 420, width: 100 }
+];
+
+let y = doc.y;
+const rowHeight = 22;
+
+// Header
+doc.rect(50, y, 495, rowHeight).fill("#003366");
+doc.fillColor("white").fontSize(11);
+
+collegeColumns.forEach(col => {
+  doc.text(col.label, col.x, y + 6, { width: col.width });
+});
+
+doc.fillColor("black");
+y += rowHeight;
+
+// Rows
+collegeStats.forEach((c, i) => {
+  if (y > 750) {
+    doc.addPage();
+    y = 50;
+  }
+
+  doc.rect(50, y, 495, rowHeight).stroke("#dddddd");
+
+  doc.fontSize(11);
+  doc.text(i + 1, collegeColumns[0].x, y + 6);
+  doc.text(c.collegeName, collegeColumns[1].x, y + 6, { width: collegeColumns[1].width });
+  doc.text(c.count, collegeColumns[2].x, y + 6);
+
+  y += rowHeight;
+});
+
+// ---------- Hired Students Table ----------
+doc.addPage();
+sectionTitle("Hired Students Details");
+
+const studentColumns = [
+  { label: "No", x: 50, width: 30 },
+  { label: "Name", x: 85, width: 120 },
+  { label: "College", x: 210, width: 150 },
+  { label: "Branch", x: 365, width: 60 },
+  { label: "Email", x: 430, width: 110 }
+];
+
+y = doc.y;
+
+// Header
+doc.rect(50, y, 495, rowHeight).fill("#003366");
+doc.fillColor("white").fontSize(11);
+
+studentColumns.forEach(col => {
+  doc.text(col.label, col.x, y + 6, { width: col.width });
+});
+
+doc.fillColor("black");
+y += rowHeight;
+
+// Rows
+hiredStudents.forEach((s, i) => {
+  if (y > 750) {
+    doc.addPage();
+    y = 50;
+  }
+
+  const rowData = [
+    String(i + 1),
+    s.name,
+    s.college,
+    s.branch,
+    s.email
+  ];
+
+  let maxHeight = rowHeight;
+
+  rowData.forEach((text, idx) => {
+    const h = doc.heightOfString(text, {
+      width: studentColumns[idx].width
     });
-    doc.moveDown();
+    maxHeight = Math.max(maxHeight, h + 8);
+  });
 
-    doc.fontSize(14).text("SUMMARY");
-    doc.fontSize(12).text(`Total Applied: ${stats.totalApplied}`);
-    doc.text(`Shortlisted: ${stats.shortlisted}`);
-    doc.text(`Hired: ${stats.hired}`);
-    doc.moveDown();
+  doc.rect(50, y, 495, maxHeight).stroke("#dddddd");
 
-    doc.fontSize(14).text("COLLEGE-WISE APPLICATIONS");
-    collegeStats.forEach(c => {
-      doc.fontSize(12).text(`${c.collegeName}: ${c.count}`);
+  rowData.forEach((text, idx) => {
+    doc.text(text, studentColumns[idx].x, y + 6, {
+      width: studentColumns[idx].width
     });
-    doc.moveDown();
+  });
 
-    doc.fontSize(14).text("HIRED STUDENTS");
-    hiredStudents.forEach((s, i) => {
-      doc.fontSize(11).text(
-        `${i + 1}. ${s.name} | ${s.college} | ${s.branch} | ${s.email}`
-      );
-    });
+  y += maxHeight;
+});
 
-    doc.end();
+// ---------- Footer ----------
+doc.moveDown(2);
+drawLine();
+doc.fontSize(9).fillColor("#666")
+   .text(`Generated on ${new Date().toLocaleDateString()}`, { align: "center" });
+
+doc.end();
+
 
   } catch (err) {
     console.error(err);
