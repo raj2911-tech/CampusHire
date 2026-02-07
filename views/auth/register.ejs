@@ -423,6 +423,11 @@
                 <label>Founded Year</label>
                 <input id="foundedYear" type="number" placeholder="e.g. 2015">
               </div>
+
+              <div class="input-group">
+                <label>Size</label>
+                <input id="companySize" type="number" placeholder="e.g. 1000">
+              </div>
         
               <div class="input-group">
                 <label>Industry</label>
@@ -438,6 +443,16 @@
                 <label>About Company</label>
                 <input id="about" placeholder="Brief description about the company">
               </div>
+
+              <div class="input-group">
+                <label>Headquarters</label>
+                <input id="headquarters" placeholder="New Delhi,India">
+              </div>
+
+              <div class="input-group">
+                <label>Website</label>
+                <input id="website" placeholder="https://example.com">
+              </div>
             </div>
         
             <!-- RIGHT COLUMN -->
@@ -450,6 +465,11 @@
               <div class="input-group">
                 <label>Contact Email</label>
                 <input id="contactEmail" type="email" placeholder="e.g. hr@company.com">
+              </div>
+              
+              <div class="input-group">
+                <label>Contact Number</label>
+                <input id="contactNumber" type="text" placeholder="e.g. 1111111111">
               </div>
             </div>
         
@@ -570,6 +590,11 @@
         const specialties = document.getElementById("specialties").value;
         const contactName = document.getElementById("contactName").value;
         const contactEmail = document.getElementById("contactEmail").value;
+        const contactNumber = document.getElementById("contactNumber").value;
+        const companySize = document.getElementById("companySize").value;
+        const headquarters = document.getElementById("headquarters").value;
+        const website = document.getElementById("website").value;
+
 
         payload = {
           ...payload,
@@ -578,9 +603,13 @@
           foundedYear: foundedYear,
           industry: industry,
           specialties: specialties.split(",").map(s => s.trim()),
+          companySize:companySize,
+          headquarters:headquarters,
+          website,website,
           contactPerson: {
             name: contactName,
             email: contactEmail,
+            mobile:contactNumber
           }
         };
       }

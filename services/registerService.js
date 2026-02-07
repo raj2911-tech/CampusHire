@@ -49,7 +49,7 @@ export const createStudentProfile=async (user, data)=>{
 export const createCompanyProfile=async (user, data)=>{
     const {name, about, website, foundedYear, industry, specialties, companySize, headquarters, contactPerson}=data;
 
-            if(!name || !about ||!foundedYear ||!industry ||!specialties ||!contactPerson){
+            if(!name || !about ||!foundedYear ||!industry ||!specialties ||!contactPerson || !companySize || !website || !headquarters){
                 throw new Error("Missing company details");
             }
 

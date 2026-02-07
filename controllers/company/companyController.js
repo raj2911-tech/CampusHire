@@ -41,7 +41,9 @@ export const updateProfile = async (req, res) => {
     foundedYear,
     industry,
     specialties,
-    contactPerson
+    headquarters,
+    website,
+    contactPerson,
   } = req.body;
 
   try {
@@ -61,6 +63,8 @@ export const updateProfile = async (req, res) => {
           about,
           foundedYear,
           industry,
+          headquarters,
+          website,
           specialties,
           contactPerson
         }

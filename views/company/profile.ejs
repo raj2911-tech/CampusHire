@@ -554,6 +554,18 @@
               <div class="info-value">${profile.foundedYear || 'N/A'}</div>
             </div>
             <div class="info-row">
+              <div class="info-label">Headquarters:</div>
+              <div class="info-value">${profile.headquarters || 'N/A'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Website:</div>
+              <div class="info-value">${profile.website || 'N/A'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Size:</div>
+              <div class="info-value">${profile.companySize || 'N/A'}</div>
+            </div>
+            <div class="info-row">
               <div class="info-label">Company ID:</div>
               <div class="info-value">${profile._id || 'N/A'}</div>
             </div>
@@ -586,6 +598,10 @@
             <div class="info-row">
               <div class="info-label">Email:</div>
               <div class="info-value">${profile.contactPerson.email || 'N/A'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Mobile:</div>
+              <div class="info-value">${profile.contactPerson.mobile || 'N/A'}</div>
             </div>
           </div>
           ` : ''}

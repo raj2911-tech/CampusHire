@@ -519,6 +519,17 @@
                 <textarea id="about" rows="4">${profile.about || ''}</textarea>
               </div>
 
+              <div class="form-group">
+                <label for="Headquarters">Headquarters</label>
+                <input type="text" id="headquarters" value="${profile.headquarters || ''}" min="1800" max="2100" />
+              </div>
+
+              <div class="form-group">
+                <label for="Website">Website</label>
+                <input type="text" id="website" value="${profile.website || ''}" min="1800" max="2100" />
+              </div>
+
+
               <div class="form-group full-width">
                 <label for="specialties">Specialties</label>
                 <input type="text" id="specialties" value="${specialtiesStr}" />
@@ -542,6 +553,11 @@
               <div class="form-group">
                 <label for="cpEmail">Contact Person Email</label>
                 <input type="email" id="cpEmail" value="${profile.contactPerson?.email || ''}" />
+              </div>
+
+              <div class="form-group">
+                <label for="cpMobile">Contact Person Mobile</label>
+                <input type="text" id="cpMobile" value="${profile.contactPerson?.mobile || ''}" />
               </div>
             </div>
 
@@ -580,12 +596,16 @@
         about: document.getElementById("about").value.trim(),
         foundedYear: document.getElementById("foundedYear").value ? parseInt(document.getElementById("foundedYear").value) : null,
         industry: document.getElementById("industry").value.trim(),
+        headquarters: document.getElementById("headquarters").value.trim(),
+        website: document.getElementById("website").value.trim(),
         specialties: specialtiesArray,
         contactPerson: {
           name: document.getElementById("cpName").value.trim(),
-          email: document.getElementById("cpEmail").value.trim()
+          email: document.getElementById("cpEmail").value.trim(),
+          mobile: document.getElementById("cpMobile").value.trim()
         }
       };
+      console.log(payload)
 
       try {
         const res = await fetch("/api/companies/profile/update", {
